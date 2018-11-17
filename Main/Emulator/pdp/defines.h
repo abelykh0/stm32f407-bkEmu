@@ -23,15 +23,6 @@
  * or implied warranty.
  */
 
-/*
- * defines.h
- */
-
-
-/*
- * Stuff to maintain compatibility across platforms.
- */
-
 #ifndef DEFINES_INCLUDED
 #define DEFINES_INCLUDED
 
@@ -41,6 +32,10 @@
 
 //#define EIS_ALLOWED
 //#define SHIFTS_ALLOWED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * Type definitions for PDP data types.
@@ -119,25 +114,25 @@ typedef struct _pdp_regs {
 #define PDP_READABLE_MEM_SIZE   (63 * 512)  /* 0 - 175777 */
 #define PDP_FULL_MEM_SIZE       (64 * 512)  /* 0 - 177777 */
 
-extern int ll_word(pdp_regs* p, c_addr addr, d_word* word);
-extern int sl_word(pdp_regs* p, c_addr addr, d_word word);
-extern int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte);
-extern int sl_byte(pdp_regs* p, c_addr addr, d_byte byte);
+int ll_word(pdp_regs* p, c_addr addr, d_word* word);
+int sl_word(pdp_regs* p, c_addr addr, d_word word);
+int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte);
+int sl_byte(pdp_regs* p, c_addr addr, d_byte byte);
 
-extern int q_reset();
-extern int pop(pdp_regs* p, d_word* data);
-extern int push(pdp_regs* p, d_word data);
-extern int storeb_dst(pdp_regs* p, d_byte data);
-extern int storeb_dst_2(pdp_regs* p, d_byte data);
-extern int store_dst(pdp_regs* p, d_word data);
-extern int load_src(pdp_regs* p, d_word* data);
-extern int load_ea(pdp_regs* p, d_word* addr);
-extern int load_dst(pdp_regs* p, d_word* data);
-extern int loadb_dst(pdp_regs* p, d_byte* data);
-extern int store_dst_2(pdp_regs* p, d_word data);
-extern int loadb_src(pdp_regs* p, d_byte* data);
-extern int brx(pdp_regs* p, unsigned int clear, unsigned int set);
-extern int service(d_word);
+void q_reset();
+int pop(pdp_regs* p, d_word* data);
+int push(pdp_regs* p, d_word data);
+int storeb_dst(pdp_regs* p, d_byte data);
+int storeb_dst_2(pdp_regs* p, d_byte data);
+int store_dst(pdp_regs* p, d_word data);
+int load_src(pdp_regs* p, d_word* data);
+int load_ea(pdp_regs* p, d_word* addr);
+int load_dst(pdp_regs* p, d_word* data);
+int loadb_dst(pdp_regs* p, d_byte* data);
+int store_dst_2(pdp_regs* p, d_word data);
+int loadb_src(pdp_regs* p, d_byte* data);
+int brx(pdp_regs* p, unsigned int clear, unsigned int set);
+int service(d_word);
 
 /*
  * Defines for the event handling system.
@@ -301,5 +296,9 @@ extern flag_t bkmodel;
 					CLR_CC_V(); \
 				else \
 					SET_CC_V()
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

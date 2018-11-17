@@ -9,7 +9,7 @@ using namespace Display;
 using namespace bk;
 
 #define DEBUG_COLUMNS 50
-#define DEBUG_ROWS 8
+#define DEBUG_ROWS 4
 
 typedef struct
 {

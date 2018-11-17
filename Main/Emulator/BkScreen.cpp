@@ -6,7 +6,7 @@ namespace bk
 {
 
 /* BK0010 Palette */
-uint8_t _palette[5] = { Black, Blue, Green, Red, White };
+uint8_t _palette[4] = { Black, Blue, Green, Red };
 
 BkScreen::BkScreen(VideoSettings settings) :
 		BkScreen(settings, 0,
@@ -17,8 +17,9 @@ BkScreen::BkScreen(VideoSettings settings) :
 
 BkScreen::BkScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
 {
-	this->_startLine = startLine;
+	this->Settings = settings;
 
+	this->_startLine = startLine;
 	this->_hResolutionNoBorder = this->Settings.TextColumns * 8;
 	this->_hResolution = this->Settings.Timing->video_pixels / this->Settings.Scale;
 	this->_vResolution = height / this->Settings.Scale;
@@ -41,13 +42,14 @@ uint8_t* BkScreen::GetPixelPointer(uint16_t line, uint8_t character)
 
 void BkScreen::Clear()
 {
+	memset(this->Settings.Pixels, 0xFF, 0x4000);
 }
 
 __attribute__((section(".ramcode")))
 Rasterizer::RasterInfo BkScreen::rasterize(
 		unsigned cycles_per_pixel, unsigned line_number, Pixel *target)
 {
-	uint8_t borderColor = *this->Settings.BorderColor;
+	uint8_t borderColor = 0x10;//*this->Settings.BorderColor;
 
 	unsigned scaledLine = (line_number - this->_startLine) / this->Settings.Scale;
 	if (scaledLine == 0)
@@ -69,23 +71,21 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
 		uint8_t* dest = &target[this->_horizontalBorder];
 
-		for (int y = 0; y < 32; y++)
+		for (int x = 0; x < 16; x++)
 		{
-			for (int x = 0; x < 16; x++)
+			uint32_t pixelInfo = *bitmap;
+
+			for (int i = 0; i < 16; i++)
 			{
-				uint32_t pixelInfo = *bitmap;
-
-				for (int i = 0; i < 16; i++)
-				{
-					uint8_t pixelColor = pixelInfo & 0x02;
-					*dest = _palette[pixelColor];
-					dest++;
-					pixelInfo >>= 2;
-				}
-
-				bitmap++;
+				uint8_t pixelColor = pixelInfo & 0x03;
+				*dest = _palette[pixelColor];
+				dest++;
+				pixelInfo >>= 2;
 			}
+
+			bitmap++;
 		}
+		//memset(dest, 0x00, 256);
 
 		// Border to the right
 		memset(&target[this->_hResolution - this->_horizontalBorder],

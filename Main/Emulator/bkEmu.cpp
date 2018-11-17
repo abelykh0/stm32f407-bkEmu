@@ -22,10 +22,15 @@
 
 uint8_t RamBuffer[RAM_AVAILABLE];
 pdp_regs pdp;
+unsigned short last_branch;
+flag_t io_stop_happened;
 BkScreen* _bkScreen;
+flag_t bkmodel = 0;
 double ticks_screen = 0.0;
 const int TICK_RATE = 3000000; /* CPU clock speed */
 double frame_delay = TICK_RATE / 25; /* Delay in ticks between video frames */
+
+void run_2(pdp_regs* p, int flag);
 
 void bk_setup(BkScreen* bkScreen)
 {
@@ -35,6 +40,7 @@ void bk_setup(BkScreen* bkScreen)
 
 int32_t bk_loop()
 {
+	run_2(&pdp, 0);
 	return 0;
 }
 
@@ -52,7 +58,7 @@ void bk_reset()
 /*
  * Load a byte from the given address.
  */
-int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
+extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 {
 	if (addr >= (uint16_t) 0xFF80)
 	{
@@ -62,17 +68,17 @@ int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 	else if (addr >= (uint16_t) 0xA000)
 	{
 		// ROM Basic
-		*byte = basic[addr - (uint16_t) 0xA000];
+		*byte = basic[addr - (uint16_t)0xA000];
 	}
 	else if (addr >= (uint16_t) 0x8000)
 	{
 		// ROM Monitor
-		*byte = monitor[addr - (uint16_t) 0x8000];
+		*byte = monitor[addr - (uint16_t)0x8000];
 	}
-	else if (addr >= (uint16_t) 0x4000)
+	else if (addr >= (uint16_t)0x4000)
 	{
 		// Video RAM
-		*byte = _bkScreen->Settings.Pixels[addr - (uint16_t) 0x4000];
+		*byte = _bkScreen->Settings.Pixels[addr - (uint16_t)0x4000];
 	}
 	else
 	{
@@ -86,7 +92,7 @@ int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 /*
  * Load a word from the given address.
  */
-int ll_word(pdp_regs* p, c_addr addr, d_word* word)
+extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 {
 	int result;
 	uint8_t byte1;
@@ -109,7 +115,7 @@ int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 /*
  * Store a byte at the given address.
  */
-int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
+extern "C" int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
 {
 	if (addr >= (uint16_t) 0xFF80)
 	{
@@ -136,7 +142,7 @@ int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
 /*
  *  Store a word at the given address.
  */
-int sc_word(pdp_regs* p, c_addr addr, d_word word)
+extern "C" int sl_word(pdp_regs* p, c_addr addr, d_word word)
 {
 	int result;
 	if ((result = sl_byte(p, addr, (uint8_t) word)) != OK)
@@ -150,6 +156,13 @@ int sc_word(pdp_regs* p, c_addr addr, d_word word)
 	}
 
 	return OK;
+}
+
+/*
+ * Reset the UNIBUS devices.
+ */
+extern "C" void q_reset()
+{
 }
 
 void run_2(pdp_regs* p, int flag)
@@ -175,8 +188,8 @@ void run_2(pdp_regs* p, int flag)
 	 * Run until told to stop.
 	 */
 
-	do
-	{
+	//do
+//	{
 		//addtocybuf(p->regs[PC]);
 
 		/*
@@ -318,7 +331,7 @@ void run_2(pdp_regs* p, int flag)
 //		if (checkpoint(p->regs[PC])) {
 //			flag = 0;
 //		}
-	} while (flag);
+	//} while (flag);
 
 	//signal( SIGINT, SIG_DFL );
 }
