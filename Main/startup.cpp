@@ -6,6 +6,7 @@
 #include "SDCard.h"
 #include "Emulator/bkEmu.h"
 #include "Keyboard/ps2Keyboard.h"
+#include "Emulator/pdp/defines.h"
 
 extern "C" void initialize()
 {
@@ -48,6 +49,11 @@ extern "C" void loop()
 	}
 
 	int32_t result = bk_loop();
+
+    char* buf = (char*)_buffer16K_1;
+    sprintf(buf, "PC %04x", pdp.regs[PC]);
+    DebugScreen.PrintAlignCenter(2, buf);
+
 	switch (result)
 	{
 	case KEY_ESC:

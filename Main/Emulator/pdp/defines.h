@@ -156,7 +156,7 @@ typedef struct _event {
  */
 
 struct _itab {
-	int (*func)();
+	int (*func)(pdp_regs* p);
 };
 
 

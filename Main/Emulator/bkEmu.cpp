@@ -29,6 +29,8 @@ flag_t bkmodel = 0;
 double ticks_screen = 0.0;
 const int TICK_RATE = 3000000; /* CPU clock speed */
 double frame_delay = TICK_RATE / 25; /* Delay in ticks between video frames */
+uint16_t m_Port177660 = 0100;
+uint16_t m_Port177664 = 01330;
 
 void run_2(pdp_regs* p, int flag);
 
@@ -52,7 +54,16 @@ void bk_reset()
 	}
 
 	pdp.ir = 0;
-	pdp.psw = 0200;
+	//pdp.psw = 0200;
+
+	pdp.regs[PC] = 0x8000;
+	//ll_word(&pdp, 0177716, &pdp.regs[PC]);
+	//pdp.regs[PC] &= 0177400;
+
+	for (uint32_t* ram = (uint32_t*)RamBuffer; ram < (uint32_t*)&RamBuffer[RAM_AVAILABLE]; ram++)
+	{
+		*ram = 0xFF00FF;
+	}
 }
 
 /*
@@ -63,7 +74,24 @@ extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 	if (addr >= (uint16_t) 0xFF80)
 	{
 		// I/O port
-		*byte = 0;
+
+		switch (addr)
+		{
+		case TTY_REG:
+			*byte = m_Port177660;
+			break;
+		case TTY_REG + 4:
+			*byte = m_Port177664;
+			break;
+		case IO_REG:
+		case IO_REG + 1:
+			// the high byte is 0200 for BK-0010
+			*byte = 020;
+			break;
+		default:
+			*byte = 0;
+			break;
+		}
 	}
 	else if (addr >= (uint16_t) 0xA000)
 	{
@@ -128,7 +156,7 @@ extern "C" int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
 	else if (addr >= (uint16_t) 0x4000)
 	{
 		// Video RAM
-		_bkScreen->Settings.Pixels[addr - (uint16_t) 0x4000] = byte;
+		_bkScreen->Settings.Pixels[addr - (uint16_t)0x4000] = byte;
 	}
 	else
 	{
@@ -201,7 +229,7 @@ void run_2(pdp_regs* p, int flag)
 		p->regs[PC] += 2;
 		if (result == OK)
 		{
-			result = (itab[p->ir >> 6].func)();
+			result = (itab[p->ir >> 6].func)(p);
 			//timing(p);
 		}
 
@@ -260,18 +288,18 @@ void run_2(pdp_regs* p, int flag)
 			}
 		}
 
-		if ((p->psw & 020) && (rtt == 0))
-		{ /* trace bit */
-			if (service((d_word) 014) != OK)
-			{
-				// Double trap
-				ll_word(p, 0177716, &p->regs[PC]);
-				p->regs[PC] &= 0177400;
-				p->regs[SP] = 01000; /* whatever */
-			}
-		}
-		rtt = 0;
-		p->total++;
+//		if ((p->psw & 020) && (rtt == 0))
+//		{ /* trace bit */
+//			if (service((d_word) 014) != OK)
+//			{
+//				// Double trap
+//				ll_word(p, 0177716, &p->regs[PC]);
+//				p->regs[PC] &= 0177400;
+//				p->regs[SP] = 01000; /* whatever */
+//			}
+//		}
+//		rtt = 0;
+//		p->total++;
 
 		//if (nflag)
 		//	sound_flush();
