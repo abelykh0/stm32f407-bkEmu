@@ -1,6 +1,7 @@
 #include "bkscreen.h"
 #include <string.h>
 #include "m4vgalib/vga.h"
+#include "draw2color.h"
 
 namespace bk
 {
@@ -71,21 +72,12 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
 		uint8_t* dest = &target[this->_horizontalBorder];
 
-		for (int x = 0; x < 8; x++)
+		for (int x = 0; x < 16; x++)
 		{
-			uint32_t pixelInfo = *bitmap;
-
-			for (int i = 0; i < 16; i++)
-			{
-				uint8_t pixelColor = pixelInfo & 0x03;
-				*dest = _palette[pixelColor];
-				dest++;
-				pixelInfo >>= 2;
-			}
-
+			Draw2Color(*bitmap, _palette, dest);
+			dest += 16;
 			bitmap++;
 		}
-		//memset(dest, 0x00, 256);
 
 		// Border to the right
 		memset(&target[this->_hResolution - this->_horizontalBorder],
