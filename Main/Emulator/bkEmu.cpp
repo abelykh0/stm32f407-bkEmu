@@ -15,6 +15,7 @@
 //   FFCA System Timer control
 
 #include "bkEmu.h"
+#include "bkInput.h"
 #include "pdp/defines.h"
 #include "resources/basic.h"
 #include "resources/monitor.h"
@@ -29,10 +30,7 @@ flag_t bkmodel = 0;
 double ticks_screen = 0.0;
 const int TICK_RATE = 3000000; /* CPU clock speed */
 double frame_delay = TICK_RATE / 25; /* Delay in ticks between video frames */
-uint16_t m_Port177660 = 0100;
 uint16_t m_Port177664 = 01330;
-
-void run_2(pdp_regs* p, int flag);
 
 void bk_setup(BkScreen* bkScreen)
 {
@@ -42,8 +40,173 @@ void bk_setup(BkScreen* bkScreen)
 
 int32_t bk_loop()
 {
-	run_2(&pdp, 0);
-	return 0;
+	pdp_regs* p = &pdp;
+	register int result; /* result of execution */
+	int result2 = OK; /* result of error handling */
+	int rtt = 0; /* rtt don't trap yet flag */
+	int32_t returnValue = 0;
+
+	//Uint32 last_screen_update = SDL_GetTicks();
+	//double timing_delta = ticks - SDL_GetTicks() * (TICK_RATE/1000.0);
+
+	/*
+	 * Fetch and execute the instruction.
+	 */
+
+	result = ll_word(p, p->regs[PC], &p->ir);
+	p->regs[PC] += 2;
+	if (result == OK)
+	{
+		result = (itab[p->ir >> 6].func)(p);
+		//timing(p);
+	}
+
+	/*
+	 * Mop up the mess.
+	 */
+
+	if (result != OK)
+	{
+		switch (result)
+		{
+		case BUS_ERROR: /* vector 4 */
+			ticks += 64;
+			break;
+		case ODD_ADDRESS:
+			result2 = service((d_word) 04);
+			break;
+		case CPU_ILLEGAL: /* vector 10 */
+			result2 = service((d_word) 010);
+			break;
+		case CPU_BPT: /* vector 14 */
+			result2 = service((d_word) 014);
+			break;
+		case CPU_EMT: /* vector 30 */
+			result2 = service((d_word) 030);
+			break;
+		case CPU_TRAP: /* vector 34 */
+			result2 = service((d_word) 034);
+			break;
+		case CPU_IOT: /* vector 20 */
+			result2 = service((d_word) 020);
+			break;
+		case CPU_WAIT:
+			in_wait_instr = 1;
+			result2 = OK;
+			break;
+		case CPU_RTT:
+			rtt = 1;
+			result2 = OK;
+			break;
+		case CPU_HALT:
+			io_stop_happened = 4;
+			result2 = service((d_word) 004);
+			break;
+		default:
+			// Unexpected return
+			//flag = 0;
+			result2 = OK;
+			break;
+		}
+		if (result2 != OK)
+		{
+			// Double trap
+			ll_word(p, 0177716, &p->regs[PC]);
+			p->regs[PC] &= 0177400;
+		}
+	}
+
+	// Keyboard input
+	int32_t scanCode = Ps2_GetScancode();
+	if (scanCode > 0)
+	{
+		if ((scanCode & 0xFF00) == 0xF000)
+		{
+			// key up
+
+			scanCode = ((scanCode & 0xFF0000) >> 8 | (scanCode & 0xFF));
+			if (!OnKey(scanCode, true))
+			{
+				returnValue = scanCode;
+			}
+		}
+		else
+		{
+			// key down
+			OnKey(scanCode, false);
+		}
+	}
+
+	if ((p->psw & 020) && (rtt == 0))
+	{ /* trace bit */
+		if (service((d_word) 014) != OK)
+		{
+			// Double trap
+			ll_word(p, 0177716, &p->regs[PC]);
+			p->regs[PC] &= 0177400;
+			p->regs[SP] = 01000; /* whatever */
+		}
+	}
+	rtt = 0;
+	p->total++;
+
+	//if (nflag)
+	//	sound_flush();
+
+//		if (bkmodel && ticks >= ticks_timer) {
+//			scr_sync();
+//			if (timer_intr_enabled) {
+//				ev_register(TIMER_PRI, service, 0, 0100);
+//			}
+//			ticks_timer += half_frame_delay;
+//		}
+
+	if (ticks >= ticks_screen)
+	{
+		/* In full speed, update every 40 real ms */
+//		    if (fullspeed) {
+//			Uint32 cur_sdl_ticks = SDL_GetTicks();
+//		 	if (cur_sdl_ticks - last_screen_update >= 40) {
+//			    last_screen_update = cur_sdl_ticks;
+//			    scr_flush();
+//			}
+//		    } else {
+//			scr_flush();
+//		    }
+//		    tty_recv();
+		ticks_screen += frame_delay;
+		/* In simulated speed, if we're more than 10 ms
+		 * ahead, slow down. Avoid rounding the delay up
+		 * by SDL. If the sound is on, sound buffering
+		 * provides synchronization.
+		 */
+//		    if (!fullspeed && !nflag) {
+//		    	double cur_delta =
+//				ticks - SDL_GetTicks() * (TICK_RATE/1000.0);
+//			if (cur_delta - timing_delta > TICK_RATE/100) {
+//				int msec = (cur_delta - timing_delta) / (TICK_RATE/1000);
+//				SDL_Delay(msec / 10 * 10);
+//			}
+//        }
+	}
+
+	/*
+	 * See if execution should be stopped.  If so
+	 * stop running, otherwise look for events
+	 * to fire.
+	 */
+
+//		if ( stop_it ) {
+//			fprintf( stderr, _("\nExecution interrupted.\n") );
+//			flag = 0;
+//		} else {
+	int priority = (p->psw >> 5) & 7;
+	if (pending_interrupts && priority != 7)
+	{
+		ev_fire(priority);
+	}
+
+	return returnValue;
 }
 
 void bk_reset()
@@ -60,7 +223,8 @@ void bk_reset()
 	//ll_word(&pdp, 0177716, &pdp.regs[PC]);
 	//pdp.regs[PC] &= 0177400;
 
-	for (uint32_t* ram = (uint32_t*)RamBuffer; ram < (uint32_t*)&RamBuffer[RAM_AVAILABLE]; ram++)
+	for (uint32_t* ram = (uint32_t*) RamBuffer;
+			ram < (uint32_t*) &RamBuffer[RAM_AVAILABLE]; ram++)
 	{
 		*ram = 0xFF00FF;
 	}
@@ -73,40 +237,23 @@ extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 {
 	if (addr >= (uint16_t) 0xFF80)
 	{
-		// I/O port
-
-		switch (addr)
-		{
-		case TTY_REG:
-			*byte = m_Port177660;
-			break;
-		case TTY_REG + 4:
-			*byte = m_Port177664;
-			break;
-		case IO_REG:
-		case IO_REG + 1:
-			// the high byte is 0200 for BK-0010
-			*byte = 020;
-			break;
-		default:
-			*byte = 0;
-			break;
-		}
+		// I/O Ports
+		*byte = 0;
 	}
 	else if (addr >= (uint16_t) 0xA000)
 	{
 		// ROM Basic
-		*byte = basic[addr - (uint16_t)0xA000];
+		*byte = basic[addr - (uint16_t) 0xA000];
 	}
 	else if (addr >= (uint16_t) 0x8000)
 	{
 		// ROM Monitor
-		*byte = monitor[addr - (uint16_t)0x8000];
+		*byte = monitor[addr - (uint16_t) 0x8000];
 	}
-	else if (addr >= (uint16_t)0x4000)
+	else if (addr >= (uint16_t) 0x4000)
 	{
 		// Video RAM
-		*byte = _bkScreen->Settings.Pixels[addr - (uint16_t)0x4000];
+		*byte = _bkScreen->Settings.Pixels[addr - (uint16_t) 0x4000];
 	}
 	else
 	{
@@ -122,20 +269,71 @@ extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
  */
 extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 {
-	int result;
-	uint8_t byte1;
-	if ((result = ll_byte(p, addr, &byte1)) != OK)
+	if (addr & 0x1)
 	{
-		return result;
+		int result;
+		uint8_t byte1;
+		if ((result = ll_byte(p, addr, &byte1)) != OK)
+		{
+			return result;
+		}
+
+		uint8_t byte2;
+		if ((result = ll_byte(p, addr + 1, &byte2)) != OK)
+		{
+			return result;
+		}
+
+		*word = (byte2 << 8) | byte1;
+
+		return ODD_ADDRESS;
 	}
 
-	uint8_t byte2;
-	if ((result = ll_byte(p, addr + 1, &byte2)) != OK)
+	if (addr >= (uint16_t) 0xFF80)
 	{
-		return result;
-	}
+		// I/O port
 
-	*word = (byte2 << 8) | byte1;
+		switch (addr)
+		{
+		case TTY_REG:
+			*word = port0177660;
+			break;
+		case TTY_REG + 2:
+			*word = port0177662;
+			port0177660 &= ~0x80;
+			break;
+		case TTY_REG + 4:
+			*word = m_Port177664;
+			break;
+		case IO_REG:
+			*word = port0177716;
+			break;
+		default:
+			*word = 0;
+			break;
+		}
+	}
+	else if (addr >= (uint16_t) 0xA000)
+	{
+		// ROM Basic
+		*word = ((uint16_t*) basic)[(addr - (uint16_t) 0xA000) >> 1];
+	}
+	else if (addr >= (uint16_t) 0x8000)
+	{
+		// ROM Monitor
+		*word = ((uint16_t*) monitor)[(addr - (uint16_t) 0x8000) >> 1];
+	}
+	else if (addr >= (uint16_t) 0x4000)
+	{
+		// Video RAM
+		*word = ((uint16_t*) _bkScreen->Settings.Pixels)[(addr
+				- (uint16_t) 0x4000) >> 1];
+	}
+	else
+	{
+		// RAM
+		*word = ((uint16_t*) RamBuffer)[addr >> 1];
+	}
 
 	return OK;
 }
@@ -156,7 +354,7 @@ extern "C" int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
 	else if (addr >= (uint16_t) 0x4000)
 	{
 		// Video RAM
-		_bkScreen->Settings.Pixels[addr - (uint16_t)0x4000] = byte;
+		_bkScreen->Settings.Pixels[addr - (uint16_t) 0x4000] = byte;
 	}
 	else
 	{
@@ -193,173 +391,3 @@ extern "C" void q_reset()
 {
 }
 
-void run_2(pdp_regs* p, int flag)
-{
-	register int result; /* result of execution */
-	int result2 = OK; /* result of error handling */
-	extern void intr_hand(); /* SIGINT handler */
-	//register unsigned priority;	/* current processor priority */
-	int rtt = 0; /* rtt don't trap yet flag */
-	//d_word oldpc;
-	//static char buf[80];
-
-	/*
-	 * Clear execution stop flag and install SIGINT handler.
-	 */
-
-	//stop_it = 0;
-	//signal( SIGINT, intr_hand );
-	//Uint32 last_screen_update = SDL_GetTicks();
-	//double timing_delta = ticks - SDL_GetTicks() * (TICK_RATE/1000.0);
-	//c_addr startpc = p->regs[PC];
-	/*
-	 * Run until told to stop.
-	 */
-
-	//do
-//	{
-		//addtocybuf(p->regs[PC]);
-
-		/*
-		 * Fetch and execute the instruction.
-		 */
-
-		result = ll_word(p, p->regs[PC], &p->ir);
-		//oldpc = p->regs[PC];
-		p->regs[PC] += 2;
-		if (result == OK)
-		{
-			result = (itab[p->ir >> 6].func)(p);
-			//timing(p);
-		}
-
-		/*
-		 * Mop up the mess.
-		 */
-
-		if (result != OK)
-		{
-			switch (result)
-			{
-			case BUS_ERROR: /* vector 4 */
-				ticks += 64;
-				break;
-			case ODD_ADDRESS:
-				result2 = service((d_word) 04);
-				break;
-			case CPU_ILLEGAL: /* vector 10 */
-				result2 = service((d_word) 010);
-				break;
-			case CPU_BPT: /* vector 14 */
-				result2 = service((d_word) 014);
-				break;
-			case CPU_EMT: /* vector 30 */
-				result2 = service((d_word) 030);
-				break;
-			case CPU_TRAP: /* vector 34 */
-				result2 = service((d_word) 034);
-				break;
-			case CPU_IOT: /* vector 20 */
-				result2 = service((d_word) 020);
-				break;
-			case CPU_WAIT:
-				in_wait_instr = 1;
-				result2 = OK;
-				break;
-			case CPU_RTT:
-				rtt = 1;
-				result2 = OK;
-				break;
-			case CPU_HALT:
-				io_stop_happened = 4;
-				result2 = service((d_word) 004);
-				break;
-			default:
-				// Unexpected return
-				flag = 0;
-				result2 = OK;
-				break;
-			}
-			if (result2 != OK)
-			{
-				// Double trap
-				ll_word(p, 0177716, &p->regs[PC]);
-				p->regs[PC] &= 0177400;
-			}
-		}
-
-//		if ((p->psw & 020) && (rtt == 0))
-//		{ /* trace bit */
-//			if (service((d_word) 014) != OK)
-//			{
-//				// Double trap
-//				ll_word(p, 0177716, &p->regs[PC]);
-//				p->regs[PC] &= 0177400;
-//				p->regs[SP] = 01000; /* whatever */
-//			}
-//		}
-//		rtt = 0;
-//		p->total++;
-
-		//if (nflag)
-		//	sound_flush();
-
-//		if (bkmodel && ticks >= ticks_timer) {
-//			scr_sync();
-//			if (timer_intr_enabled) {
-//				ev_register(TIMER_PRI, service, 0, 0100);
-//			}
-//			ticks_timer += half_frame_delay;
-//		}
-
-		if (ticks >= ticks_screen)
-		{
-			/* In full speed, update every 40 real ms */
-//		    if (fullspeed) {
-//			Uint32 cur_sdl_ticks = SDL_GetTicks();
-//		 	if (cur_sdl_ticks - last_screen_update >= 40) {
-//			    last_screen_update = cur_sdl_ticks;
-//			    scr_flush();
-//			}
-//		    } else {
-//			scr_flush();
-//		    }
-//		    tty_recv();
-			ticks_screen += frame_delay;
-			/* In simulated speed, if we're more than 10 ms
-			 * ahead, slow down. Avoid rounding the delay up
-			 * by SDL. If the sound is on, sound buffering
-			 * provides synchronization.
-			 */
-//		    if (!fullspeed && !nflag) {
-//		    	double cur_delta =
-//				ticks - SDL_GetTicks() * (TICK_RATE/1000.0);
-//			if (cur_delta - timing_delta > TICK_RATE/100) {
-//				int msec = (cur_delta - timing_delta) / (TICK_RATE/1000);
-//				SDL_Delay(msec / 10 * 10);
-//			}
-//        }
-		}
-
-		/*
-		 * See if execution should be stopped.  If so
-		 * stop running, otherwise look for events
-		 * to fire.
-		 */
-
-//		if ( stop_it ) {
-//			fprintf( stderr, _("\nExecution interrupted.\n") );
-//			flag = 0;
-//		} else {
-//			priority = ( p->psw >> 5) & 7;
-//			if ( pending_interrupts && priority != 7 ) {
-//				ev_fire( priority );
-//			}
-//		}
-//		if (checkpoint(p->regs[PC])) {
-//			flag = 0;
-//		}
-	//} while (flag);
-
-	//signal( SIGINT, SIG_DFL );
-}

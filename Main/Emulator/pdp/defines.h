@@ -134,6 +134,9 @@ int loadb_src(pdp_regs* p, d_byte* data);
 int brx(pdp_regs* p, unsigned int clear, unsigned int set);
 int service(d_word);
 
+int ev_register(unsigned int priority, int (*handler)(d_word info), unsigned long delay, d_word info);
+int ev_fire(int priority);
+
 /*
  * Defines for the event handling system.
  */
@@ -145,9 +148,9 @@ int service(d_word);
 #define TTY_PRI		1
 
 typedef struct _event {
-	int (*handler)();		/* handler function */
-	d_word info;			/* info or vector number */
-	double when;			/* when to fire this event */
+	int (*handler)(d_word info); /* handler function */
+	d_word info;			     /* info or vector number */
+	double when;			     /* when to fire this event */
 } event;
 
 
@@ -170,6 +173,7 @@ extern struct _itab itab[];
 extern pdp_regs pdp;
 extern double ticks;
 extern flag_t in_wait_instr;
+extern unsigned long pending_interrupts;
 
 // bkmodel == 0 is BK-0010, 1 is BK-0011M.
 extern flag_t bkmodel;

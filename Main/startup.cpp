@@ -50,9 +50,9 @@ extern "C" void loop()
 
 	int32_t result = bk_loop();
 
-    char* buf = (char*)_buffer16K_1;
-    sprintf(buf, "PC %04x", pdp.regs[PC]);
-    DebugScreen.PrintAlignCenter(2, buf);
+//    char* buf = (char*)_buffer16K_1;
+//    sprintf(buf, "PC %04x", pdp.regs[PC]);
+//    DebugScreen.PrintAlignCenter(2, buf);
 
 	switch (result)
 	{

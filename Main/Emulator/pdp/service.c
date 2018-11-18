@@ -40,7 +40,7 @@ int ev_init()
 int
 ev_register( priority, handler, delay, info )
 unsigned priority;
-int (*handler)(); 
+int (*handler)(d_word info);
 unsigned long delay;	/* in clock ticks */
 d_word info;
 {
