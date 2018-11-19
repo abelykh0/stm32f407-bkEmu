@@ -9,13 +9,8 @@
 #define Red       0B00000011
 #define Green     0B00001100
 #define Blue      0B00110000
-#define Yellow    0B00001111
-#define Cyan      0B00111100
-#define Magenta   0B00110011
-#define Brown     0B00010111
-#define Violet    0B00110111
-#define DarkRed   0B00000001
-#define LightBlue 0B00010000
+#define LightGrey 0B00010101
+#define Grey      0B00101010
 #define White     0B00111111
 
 using namespace Display;
@@ -40,7 +35,6 @@ protected:
 	virtual uint8_t* GetPixelPointer(uint16_t line, uint8_t character);
 
 public:
-    uint32_t _pixelCount;
     volatile uint32_t _frames = 0;
 
     VideoSettings Settings;

@@ -313,26 +313,25 @@ extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 			break;
 		}
 	}
-	else if (addr >= (uint16_t) 0xA000)
+	else if (addr >= (uint16_t)0xA000)
 	{
 		// ROM Basic
-		*word = ((uint16_t*) basic)[(addr - (uint16_t) 0xA000) >> 1];
+		*word = ((uint16_t*) basic)[(addr - (uint16_t)0xA000) >> 1];
 	}
-	else if (addr >= (uint16_t) 0x8000)
+	else if (addr >= (uint16_t)0x8000)
 	{
 		// ROM Monitor
-		*word = ((uint16_t*) monitor)[(addr - (uint16_t) 0x8000) >> 1];
+		*word = ((uint16_t*) monitor)[(addr - (uint16_t)0x8000) >> 1];
 	}
-	else if (addr >= (uint16_t) 0x4000)
+	else if (addr >= (uint16_t)0x4000)
 	{
 		// Video RAM
-		*word = ((uint16_t*) _bkScreen->Settings.Pixels)[(addr
-				- (uint16_t) 0x4000) >> 1];
+		*word = ((uint16_t*) _bkScreen->Settings.Pixels)[(addr - (uint16_t)0x4000) >> 1];
 	}
 	else
 	{
 		// RAM
-		*word = ((uint16_t*) RamBuffer)[addr >> 1];
+		*word = ((uint16_t*)RamBuffer)[addr >> 1];
 	}
 
 	return OK;
@@ -370,16 +369,41 @@ extern "C" int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
  */
 extern "C" int sl_word(pdp_regs* p, c_addr addr, d_word word)
 {
-	int result;
-	if ((result = sl_byte(p, addr, (uint8_t) word)) != OK)
+	if (addr & 0x1)
 	{
-		return result;
+		int result;
+		if ((result = sl_byte(p, addr, (uint8_t)word)) != OK)
+		{
+			return result;
+		}
+
+		if ((result = sl_byte(p, addr + 1, (uint8_t)(word >> 8))) != OK)
+		{
+			return result;
+		}
+
+		return ODD_ADDRESS;
 	}
 
-	if ((result = sl_byte(p, addr + 1, (uint8_t) (word >> 8))) != OK)
+	if (addr >= (uint16_t)0xFF80)
 	{
-		return result;
+		// I/O port
 	}
+	else if (addr >= (uint16_t)0xA000)
+	{
+		// Can't write to ROM
+	}
+	else if (addr >= (uint16_t)0x4000)
+	{
+		// Video RAM
+		((uint16_t*)_bkScreen->Settings.Pixels)[(addr - (uint16_t)0x4000) >> 1] = word;
+	}
+	else
+	{
+		// RAM
+		((uint16_t*)RamBuffer)[addr >> 1] = word;
+	}
+
 
 	return OK;
 }

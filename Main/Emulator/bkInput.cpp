@@ -17,8 +17,7 @@ uint16_t port0177716 = 0x40;
 
 int tty_finish(d_word info)
 {
-	//service(( info & 0200 ) ? TTY_VECTOR2 : TTY_VECTOR);
-	service(TTY_VECTOR);
+	service(( info & 0200 ) ? TTY_VECTOR2 : TTY_VECTOR);
 	//tty_pending_int = 0;
 	return OK;
 }
@@ -37,6 +36,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	}
 
 	port0177660 |= 0x80;
+	port0177716 |= 0x04;
 	if (isKeyUp)
 	{
 		port0177716 &= ~0x80;
@@ -45,13 +45,9 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	{
 		port0177716 |= 0x80;
 	}
-	port0177662 = symbol;
+	port0177662 = symbol & 0x7F;
 
 	ev_register(TTY_PRI, tty_finish, 0, port0177662);
-	//if ( !tty_pending_int && !(tty_reg & TTY_IE) ) {
-	//	ev_register(TTY_PRI, tty_finish, (unsigned long) 0, c);
-	//	tty_pending_int = c & 0200 ? TTY_VECTOR2 : TTY_VECTOR;
-	//}
 
 	return true;
 }
