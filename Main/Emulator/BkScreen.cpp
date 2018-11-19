@@ -13,7 +13,18 @@ namespace bk
 
 uint8_t _palette1[4] = { Black, Blue, Green, Red };
 uint8_t _palette2[4] = { Black, LightGrey, Grey, White };
-uint8_t _palette3[2] = { Black, White };
+uint16_t _palette3[4] = {
+		Black | Black << 8,
+		Black | White << 8,
+		White | Black << 8,
+		White | White << 8
+};
+uint16_t _palette4[4] = {
+		LightBlue | LightBlue << 8,
+		LightBlue | White << 8,
+		White | LightBlue << 8,
+		White | White << 8
+};
 
 BkScreen::BkScreen(VideoSettings settings) :
 		BkScreen(settings, 0,

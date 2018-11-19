@@ -11,6 +11,7 @@
 #define Blue      0B00110000
 #define LightGrey 0B00010101
 #define Grey      0B00101010
+#define LightBlue 0B00010000
 #define White     0B00111111
 
 using namespace Display;
