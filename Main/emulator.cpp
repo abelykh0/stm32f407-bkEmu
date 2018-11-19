@@ -47,8 +47,8 @@ vga::Band _debugBand {
 // BK screen band
 VideoSettings _bkVideoSettings {
 	&vga::timing_800x600_56hz, // Timing
-	2,  // Scale
-	32, 32, _bkScreenData.Pixels, nullptr, &_bkScreenData.BorderColor
+	0,  // not used
+	64, 32, _bkScreenData.Pixels, nullptr, &_bkScreenData.BorderColor
 };
 BkScreen MainScreen(_bkVideoSettings, 0, _bkBandHeight);
 vga::Band _band {

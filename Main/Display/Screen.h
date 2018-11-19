@@ -19,20 +19,19 @@ private:
     void Bitmap(uint16_t x, uint16_t y, const unsigned char *bmp,
                 uint16_t i, uint8_t width, uint8_t lines);
     void CursorNext();
-    void InvertColor();
-
-	uint16_t _startLine;
-    uint16_t _horizontalBorder;
-    uint8_t _verticalBorder;
-    bool _isCursorVisible;
 
 protected:
 	virtual uint8_t* GetPixelPointer(uint16_t line);
 	virtual uint8_t* GetPixelPointer(uint16_t line, uint8_t character);
+    virtual void InvertColor();
 
     uint16_t _hResolution;
     uint16_t _hResolutionNoBorder;
     uint16_t _vResolution;
+	uint16_t _startLine;
+    uint16_t _horizontalBorder;
+    uint8_t _verticalBorder;
+    bool _isCursorVisible;
 
     uint8_t* _font = (uint8_t*)font8x8;
     uint16_t _attribute = 0x3F10; // white on blue

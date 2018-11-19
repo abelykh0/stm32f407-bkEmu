@@ -30,7 +30,6 @@ flag_t bkmodel = 0;
 double ticks_screen = 0.0;
 const int TICK_RATE = 3000000; /* CPU clock speed */
 double frame_delay = TICK_RATE / 25; /* Delay in ticks between video frames */
-uint16_t m_Port177664 = 01330;
 
 void bk_setup(BkScreen* bkScreen)
 {
@@ -190,16 +189,6 @@ int32_t bk_loop()
 //        }
 	}
 
-	/*
-	 * See if execution should be stopped.  If so
-	 * stop running, otherwise look for events
-	 * to fire.
-	 */
-
-//		if ( stop_it ) {
-//			fprintf( stderr, _("\nExecution interrupted.\n") );
-//			flag = 0;
-//		} else {
 	int priority = (p->psw >> 5) & 7;
 	if (pending_interrupts && priority != 7)
 	{
@@ -221,7 +210,7 @@ void bk_reset()
 
 	pdp.regs[PC] = 0x8000;
 	//ll_word(&pdp, 0177716, &pdp.regs[PC]);
-	//pdp.regs[PC] &= 0177400;
+//	pdp.regs[PC] &= 0177400;
 
 	for (uint32_t* ram = (uint32_t*) RamBuffer;
 			ram < (uint32_t*) &RamBuffer[RAM_AVAILABLE]; ram++)
@@ -303,7 +292,7 @@ extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 			port0177660 &= ~0x80;
 			break;
 		case TTY_REG + 4:
-			*word = m_Port177664;
+			*word = port0177664;
 			break;
 		case IO_REG:
 			*word = port0177716;
@@ -388,6 +377,19 @@ extern "C" int sl_word(pdp_regs* p, c_addr addr, d_word word)
 	if (addr >= (uint16_t)0xFF80)
 	{
 		// I/O port
+
+		switch (addr)
+		{
+		case TTY_REG:
+			/* only let them set IE */
+			port0177660 = (port0177660 & ~0x40) | (word & 0x40);
+			break;
+		case TTY_REG + 4:
+			port0177664 = (word & 01377);
+			break;
+		default:
+			break;
+		}
 	}
 	else if (addr >= (uint16_t)0xA000)
 	{

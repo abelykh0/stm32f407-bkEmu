@@ -36,7 +36,7 @@ void Screen::Clear()
 	{
 		this->Settings.Attributes[i] = this->_attribute;
 	}
-	*this->Settings.BorderColor = (uint8_t) this->_attribute;
+	*this->Settings.BorderColor = (uint8_t)this->_attribute;
 }
 
 uint8_t* Screen::GetPixelPointer(uint16_t line)
@@ -51,7 +51,7 @@ uint8_t* Screen::GetPixelPointer(uint16_t line, uint8_t character)
 
 void Screen::SetFont(const uint8_t* font)
 {
-	this->_font = (uint8_t*) font;
+	this->_font = (uint8_t*)font;
 }
 
 void Screen::SetAttribute(uint16_t attribute)
@@ -300,7 +300,10 @@ void Screen::DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c)
 void Screen::PrintCharAt(uint8_t x, uint8_t y, unsigned char c, uint16_t color)
 {
 	this->DrawChar(this->_font, x * 8, y * 8, c);
-	this->Settings.Attributes[y * this->Settings.TextColumns + x] = color;
+	if (this->_attributeCount > 0)
+	{
+		this->Settings.Attributes[y * this->Settings.TextColumns + x] = color;
+	}
 }
 
 void Screen::CursorNext()
