@@ -227,7 +227,39 @@ extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 	if (addr >= (uint16_t) 0xFF80)
 	{
 		// I/O Ports
-		*byte = 0;
+
+		switch (addr)
+		{
+		case TTY_REG:
+			*byte = (uint8_t)port0177660;
+			break;
+		case TTY_REG + 1:
+			*byte = (uint8_t)port0177660 >> 8;
+			break;
+		case TTY_REG + 2:
+			*byte = (uint8_t)port0177662;
+			port0177660 &= ~0x80;
+			break;
+		case TTY_REG + 3:
+			*byte = (uint8_t)port0177662 >> 8;
+			port0177660 &= ~0x80;
+			break;
+		case TTY_REG + 4:
+			*byte = (uint8_t)port0177664;
+			break;
+		case TTY_REG + 5:
+			*byte = (uint8_t)port0177664 >> 8;
+			break;
+		case IO_REG:
+			*byte = (uint8_t)port0177716;
+			break;
+		case IO_REG + 1:
+			*byte = (uint8_t)port0177716 >> 8;
+			break;
+		default:
+			*byte = 0;
+			break;
+		}
 	}
 	else if (addr >= (uint16_t) 0xA000)
 	{
@@ -334,6 +366,28 @@ extern "C" int sl_byte(pdp_regs* p, c_addr addr, d_byte byte)
 	if (addr >= (uint16_t) 0xFF80)
 	{
 		// I/O port
+
+		switch (addr)
+		{
+		case TTY_REG:
+			/* only let them set IE */
+			port0177660 = (port0177660 & ~0x40) | (byte & 0x40);
+			break;
+		case TTY_REG + 2:
+			port0177662 = (port0177662 & 0xFF00) | byte;
+			break;
+		case TTY_REG + 3:
+			port0177662 = (port0177662 & 0xFF) | (byte >> 8);
+			break;
+		case TTY_REG + 4:
+			port0177664 = (port0177664 & 0xFF00) | byte;
+			break;
+		case TTY_REG + 5:
+			port0177664 = (port0177664 & 0xFF) | (byte >> 8);
+			break;
+		default:
+			break;
+		}
 	}
 	else if (addr >= (uint16_t) 0xA000)
 	{
