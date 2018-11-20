@@ -1,4 +1,5 @@
 #include "bkinput.h"
+#include "bkEmu.h"
 #include "Emulator/pdp/defines.h"
 #include "Keyboard/ps2Keyboard.h"
 
@@ -18,7 +19,7 @@ uint16_t port0177716 = 0x40;
 #define TTY_VECTOR      060     /* standard vector  */
 #define TTY_VECTOR2     0274    /* AR2 (ALT) vector */
 
-char keyMap[] = {
+char keyMap1[] = {
 	// A    B    C    D    E    F    G    H    I    J
 	  'F', 'I', 'S', 'W', 'T', 'A', 'P', 'R', '[', 'O',
 
@@ -27,6 +28,16 @@ char keyMap[] = {
 
 	// U    V    W    X    Y    Z
 	  'G', 'M', 'C', '^', 'N', 'Q'
+};
+char keyMap2[] = {
+	// a    b    c    d    e    f    g    h    i    j
+	  'f', 'i', 's', 'w', 't', 'a', 'p', 'r', '[', 'o',
+
+	// k    l    m    n    o    p    q    r    s    t
+	  'l', 'd', 'x', 't', ']', 'z', 'j', 'k', 'y', 'e',
+
+	// u    v    w    x    y    z
+	  'g', 'm', 'c', '^', 'n', 'q'
 };
 
 int tty_finish(d_word info)
@@ -77,6 +88,19 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 		break;
 	default:
 		symbol = Ps2_ConvertScancode(scanCode);
+		if (RamBuffer[0x0023] == 0x80)
+		{
+			// РУС
+			if (symbol >= 'A' && symbol <= 'Z')
+			{
+				symbol = keyMap1[symbol - 'A'];
+			}
+			else if (symbol >= 'a' && symbol <= 'z')
+			{
+				symbol = keyMap2[symbol - 'a'];
+			}
+		}
+
 		break;
 	}
 

@@ -1,8 +1,8 @@
 #include "bkscreen.h"
 #include <string.h>
 #include "m4vgalib/vga.h"
+#include "m4vgalib/unpack_1bpp.h"
 #include "draw2color.h"
-#include "draw4bw.h"
 #include "bkemu.h"
 
 //   0020 Screen mode 0 - 512x256, FF - 256x256
@@ -15,30 +15,7 @@ namespace bk
 
 uint8_t _palette1[4] = { Black, Blue, Green, Red };
 uint8_t _palette2[4] = { Black, LightGrey, Grey, White };
-uint32_t _palette3[16] = {
-		Black << 24 | Black << 16 | Black << 8 | Black,
-		Black << 24 | Black << 16 | Black << 8 | White,
-		Black << 24 | Black << 16 | White << 8 | Black,
-		Black << 24 | Black << 16 | White << 8 | White,
-		Black << 24 | White << 16 | Black << 8 | Black,
-		Black << 24 | White << 16 | Black << 8 | White,
-		Black << 24 | White << 16 | White << 8 | Black,
-		Black << 24 | White << 16 | White << 8 | White,
-		White << 24 | Black << 16 | Black << 8 | Black,
-		White << 24 | Black << 16 | Black << 8 | White,
-		White << 24 | Black << 16 | White << 8 | Black,
-		White << 24 | Black << 16 | White << 8 | White,
-		White << 24 | White << 16 | Black << 8 | Black,
-		White << 24 | White << 16 | Black << 8 | White,
-		White << 24 | White << 16 | White << 8 | Black,
-		White << 24 | White << 16 | White << 8 | White
-};
-uint16_t _palette4[4] = {
-		LightBlue | LightBlue << 8,
-		LightBlue | White << 8,
-		White     | LightBlue << 8,
-		White     | White << 8
-};
+uint8_t _palette3[2] = { Black, White };
 
 BkScreen::BkScreen(VideoSettings settings) :
 		BkScreen(settings, 0,
@@ -93,12 +70,7 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 
 		if (isNarrow)
 		{
-			for (int x = 0; x < 16; x++)
-			{
-				Draw4BW(*bitmap, _palette3, dest);
-				dest += 32;
-				bitmap++;
-			}
+			rast::unpack_1bpp_impl(bitmap, _palette3, dest, 16);
 		}
 		else
 		{
