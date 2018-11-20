@@ -2,6 +2,9 @@
 #include "Emulator/pdp/defines.h"
 #include "Keyboard/ps2Keyboard.h"
 
+// 0020 Screen mode 0 - 512x256, FF - 256x256
+// 0023 Keyboard 0 - LAT, 80 - RUS
+
 // bit 6 : interrupt enable
 // bit 7 : status, 1 new key code available
 uint8_t port0177660 = 0x40;
@@ -14,6 +17,17 @@ uint16_t port0177716 = 0x40;
 
 #define TTY_VECTOR      060     /* standard vector  */
 #define TTY_VECTOR2     0274    /* AR2 (ALT) vector */
+
+char keyMap[] = {
+	// A    B    C    D    E    F    G    H    I    J
+	  'F', 'I', 'S', 'W', 'T', 'A', 'P', 'R', '[', 'O',
+
+	// K    L    M    N    O    P    Q    R    S    T
+	  'L', 'D', 'X', 'T', ']', 'Z', 'J', 'K', 'Y', 'E',
+
+	// U    V    W    X    Y    Z
+	  'G', 'M', 'C', '^', 'N', 'Q'
+};
 
 int tty_finish(d_word info)
 {
@@ -32,11 +46,23 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	char symbol;
 	switch (scanCode)
 	{
-	case KEY_ENTER:
-		symbol = 0x0A;
+	case KEY_LEFTARROW:
+		symbol = 0x08;
+		break;
+	case KEY_RIGHTARROW:
+		symbol = 0x19;
+		break;
+	case KEY_UPARROW:
+		symbol = 0x1A;
+		break;
+	case KEY_DOWNARROW:
+		symbol = 0x1B;
 		break;
 	case KEY_BACKSPACE:
-		symbol = 0x08;
+		symbol = 0x18;
+		break;
+	case KEY_ENTER:
+		symbol = 0x0A;
 		break;
 	case KEY_LEFTCONTROL: // РУС
 	case KEY_L_GUI:
