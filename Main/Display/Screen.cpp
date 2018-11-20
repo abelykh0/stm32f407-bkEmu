@@ -19,8 +19,8 @@ Screen::Screen(VideoSettings settings, uint16_t startLine, uint16_t height)
 	this->_isCursorVisible = false;
 
 	this->_hResolutionNoBorder = this->Settings.TextColumns * 8;
-	this->_hResolution = this->Settings.Timing->video_pixels / this->Settings.Scale;
-	this->_vResolution = height / this->Settings.Scale;
+	this->_hResolution = this->Settings.Timing->video_pixels / this->Settings.HorizontalScale;
+	this->_vResolution = height / this->Settings.VerticalScale;
 
 	this->_horizontalBorder = (this->_hResolution - this->_hResolutionNoBorder) / 2;
     this->_verticalBorder = (this->_vResolution - this->Settings.TextRows * 8) / 2;
@@ -145,7 +145,7 @@ Rasterizer::RasterInfo Screen::rasterize(
 {
     uint8_t borderColor = *this->Settings.BorderColor;
 
-    unsigned scaledLine = (line_number - this->_startLine) / this->Settings.Scale;
+    unsigned scaledLine = (line_number - this->_startLine) / this->Settings.VerticalScale;
     if (scaledLine == 0)
     {
     	this->_frames++;
@@ -181,8 +181,8 @@ Rasterizer::RasterInfo Screen::rasterize(
 	Rasterizer::RasterInfo result;
 	result.offset = 0;
 	result.length = this->_hResolution;
-	result.cycles_per_pixel = cycles_per_pixel * this->Settings.Scale;
-	result.repeat_lines = (unsigned) (this->Settings.Scale - 1);
+	result.cycles_per_pixel = cycles_per_pixel * this->Settings.HorizontalScale;
+	result.repeat_lines = (unsigned) (this->Settings.VerticalScale - 1);
 	return result;
 }
 

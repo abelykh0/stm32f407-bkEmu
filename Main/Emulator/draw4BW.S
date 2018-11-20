@@ -15,15 +15,15 @@ Draw4BW:
       pal   .req r1
       dst   .req r2
 
-	  ror pix, #31 // << 1
-	  and r3, pix, #6
-	  ldrh r3, [pal, r3]
-	  strh r3, [dst], #2
-	.rept 15
-	  ror pix, #2
-	  and r3, pix, #6
-	  ldrh r3, [pal, r3]
-	  strh r3, [dst], #2
+	  ror pix, #30 // << 2
+	  and r3, pix, #60
+	  ldr r3, [pal, r3]
+	  str r3, [dst], #4
+	.rept 7
+	  ror pix, #4
+	  and r3, pix, #60
+	  ldr r3, [pal, r3]
+	  str r3, [dst], #4
 	.endr
 
     bx lr

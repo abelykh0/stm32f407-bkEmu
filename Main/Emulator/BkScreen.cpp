@@ -15,11 +15,23 @@ namespace bk
 
 uint8_t _palette1[4] = { Black, Blue, Green, Red };
 uint8_t _palette2[4] = { Black, LightGrey, Grey, White };
-uint16_t _palette3[4] = {
-		Black | Black << 8,
-		Black | White << 8,
-		White | Black << 8,
-		White | White << 8
+uint32_t _palette3[16] = {
+		Black | Black << 8 | Black << 16 | Black << 24,
+		Black | Black << 8 | Black << 16 | White << 24,
+		Black | Black << 8 | White << 16 | Black << 24,
+		Black | Black << 8 | White << 16 | White << 24,
+		Black | White << 8 | Black << 16 | Black << 24,
+		Black | White << 8 | Black << 16 | White << 24,
+		Black | White << 8 | White << 16 | Black << 24,
+		Black | White << 8 | White << 16 | White << 24,
+		White | Black << 8 | Black << 16 | Black << 24,
+		White | Black << 8 | Black << 16 | White << 24,
+		White | Black << 8 | White << 16 | Black << 24,
+		White | Black << 8 | White << 16 | White << 24,
+		White | White << 8 | Black << 16 | Black << 24,
+		White | White << 8 | Black << 16 | White << 24,
+		White | White << 8 | White << 16 | Black << 24,
+		White | White << 8 | White << 16 | White << 24,
 };
 uint16_t _palette4[4] = {
 		LightBlue | LightBlue << 8,
@@ -53,31 +65,31 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 {
 	uint8_t borderColor = 0x10; //*this->Settings.BorderColor;
 	bool isNarrow = (RamBuffer[0x0020] == 0);
-	uint8_t charactersIn16bit = (isNarrow ? 2 : 1);
+	uint8_t divider = (isNarrow ? 1 : 2);
 
-	unsigned scaledLine = (line_number - this->_startLine) / this->Settings.Scale;
+	unsigned scaledLine = (line_number - this->_startLine) / 2;
 	if (scaledLine == 0)
 	{
 		this->_frames++;
 	}
 
 	if (scaledLine < this->_verticalBorder
-			|| scaledLine >= (unsigned) (this->_vResolution - this->_verticalBorder))
+			|| scaledLine >= (unsigned)(this->_vResolution - this->_verticalBorder))
 	{
-		memset(&target[0], borderColor, this->_hResolution / charactersIn16bit);
+		memset(&target[0], borderColor, this->_hResolution / divider);
 	}
 	else
 	{
 		// Border to the left
-		memset(&target[0], borderColor, this->_horizontalBorder / charactersIn16bit);
+		memset(&target[0], borderColor, this->_horizontalBorder / divider);
 
 		uint16_t vline = scaledLine - this->_verticalBorder;
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
-		uint8_t* dest = &target[this->_horizontalBorder / charactersIn16bit];
+		uint8_t* dest = &target[this->_horizontalBorder / divider];
 
 		if (isNarrow)
 		{
-			for (int x = 0; x < 16; x++)
+			for (int x = 0; x < 2; x++)
 			{
 				Draw4BW(*bitmap, _palette3, dest);
 				dest += 32;
@@ -95,14 +107,14 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		}
 
 		// Border to the right
-		memset(&target[(this->_hResolution - this->_horizontalBorder) / charactersIn16bit],
-				borderColor, this->_horizontalBorder / charactersIn16bit);
+		memset(&target[(this->_hResolution - this->_horizontalBorder) / divider],
+				borderColor, this->_horizontalBorder / divider);
 	}
 
 	Rasterizer::RasterInfo result;
 	result.offset = 0;
-	result.length = this->_hResolution * charactersIn16bit;
-	result.cycles_per_pixel = cycles_per_pixel * (isNarrow ? 1 : 2);
+	result.length = this->_hResolution / divider;
+	result.cycles_per_pixel = cycles_per_pixel * divider;
 	result.repeat_lines = 1;
 	return result;
 }

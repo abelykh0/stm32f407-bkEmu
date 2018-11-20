@@ -4,10 +4,10 @@
 
 // bit 6 : interrupt enable
 // bit 7 : status, 1 new key code available
-uint16_t port0177660 = 0x40;
+uint8_t port0177660 = 0x40;
 
 // bit 0..6 : key code
-uint16_t port0177662;
+uint8_t port0177662;
 
 // bit 6 : 0 key pressed
 uint16_t port0177716 = 0x40;
@@ -29,7 +29,31 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 		return false;
 	}
 
-	char symbol = Ps2_ConvertScancode(scanCode);
+	char symbol;
+	switch (scanCode)
+	{
+	case KEY_ENTER:
+		symbol = 0x0A;
+		break;
+	case KEY_BACKSPACE:
+		symbol = 0x08;
+		break;
+	case KEY_LEFTCONTROL: // РУС
+	case KEY_L_GUI:
+		symbol = 0x0E;
+		break;
+	case KEY_RIGHTCONTROL: // ЛАТ
+	case KEY_R_GUI:
+		symbol = 0x0F;
+		break;
+	case KEY_ALT: // АР2
+		symbol = 0x0F;
+		break;
+	default:
+		symbol = Ps2_ConvertScancode(scanCode);
+		break;
+	}
+
 	if (symbol == '\0')
 	{
 		return false;

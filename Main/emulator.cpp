@@ -33,7 +33,7 @@ BkScreenData* _savedScreenData = (BkScreenData*)_buffer16K_2;
 uint16_t _debugBandHeight = DEBUG_ROWS * 8 * 2;
 VideoSettings _videoSettings {
 	&vga::timing_800x600_56hz, // Timing
-	2,  // Scale
+	2, 2,  // Scale
 	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, _debugAttributes,
 	&_debugBorderColor
 };
@@ -47,7 +47,7 @@ vga::Band _debugBand {
 // BK screen band
 VideoSettings _bkVideoSettings {
 	&vga::timing_800x600_56hz, // Timing
-	0,  // not used
+	1, 2, // Scale
 	64, 32, _bkScreenData.Pixels, nullptr, &_bkScreenData.BorderColor
 };
 BkScreen MainScreen(_bkVideoSettings, 0, _bkBandHeight);

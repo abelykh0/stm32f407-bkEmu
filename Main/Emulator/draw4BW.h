@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void Draw4BW(uint32_t pixels, uint16_t* palette, uint8_t* dest);
+void Draw4BW(uint32_t pixels, uint32_t* palette, uint8_t* dest);
 
 #ifdef __cplusplus
 }

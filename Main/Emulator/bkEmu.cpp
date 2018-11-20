@@ -231,17 +231,10 @@ extern "C" int ll_byte(pdp_regs* p, c_addr addr, d_byte* byte)
 		switch (addr)
 		{
 		case TTY_REG:
-			*byte = (uint8_t)port0177660;
-			break;
-		case TTY_REG + 1:
-			*byte = (uint8_t)port0177660 >> 8;
+			*byte = port0177660;
 			break;
 		case TTY_REG + 2:
-			*byte = (uint8_t)port0177662;
-			port0177660 &= ~0x80;
-			break;
-		case TTY_REG + 3:
-			*byte = (uint8_t)port0177662 >> 8;
+			*byte = port0177662;
 			port0177660 &= ~0x80;
 			break;
 		case TTY_REG + 4:
@@ -317,10 +310,10 @@ extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 		switch (addr)
 		{
 		case TTY_REG:
-			*word = port0177660;
+			*word = (uint16_t)port0177660;
 			break;
 		case TTY_REG + 2:
-			*word = port0177662;
+			*word = (uint16_t)port0177662;
 			port0177660 &= ~0x80;
 			break;
 		case TTY_REG + 4:
