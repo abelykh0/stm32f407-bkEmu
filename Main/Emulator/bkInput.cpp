@@ -72,6 +72,9 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	case KEY_BACKSPACE:
 		symbol = 0x18;
 		break;
+	case KEY_TAB:
+		symbol = 0x09;
+		break;
 	case KEY_ENTER:
 		symbol = 0x0A;
 		break;
