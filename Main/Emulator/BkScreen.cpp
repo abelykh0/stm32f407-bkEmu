@@ -58,12 +58,12 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		this->_frames++;
 
 		memset(&target[0], borderColor, scaledResolution);
-		result.repeat_lines = this->_verticalBorder - 1;
+		result.repeat_lines = this->_verticalBorder * 2 - 1;
 	}
 	else if (scaledLine >= (unsigned)(this->_vResolution - this->_verticalBorder - 1))
 	{
 		memset(&target[0], borderColor, scaledResolution);
-		result.repeat_lines = (this->_vResolution - this->_verticalBorder * 2) - 1;
+		result.repeat_lines = (this->_vResolution - this->_verticalBorder) * 2 - 1;
 	}
 	else
 	{
