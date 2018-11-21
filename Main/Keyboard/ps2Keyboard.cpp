@@ -4,6 +4,8 @@
 #include "ps2keyboard.h"
 #include "queue.h"
 
+uint32_t ModifierKeyState;
+
 typedef enum
 {
     IDLE = 0,
@@ -24,8 +26,6 @@ int32_t kb_data;
 
 uint8_t lastClk = 1;
 uint8_t lastData;
-bool _isLeftShiftPressed;
-bool _isRightShiftPressed;
 volatile uint8_t _parity;
 
 void Ps2_Initialize()
@@ -49,8 +49,7 @@ void Ps2_Initialize()
     ps2_status = IDLE;
     QueueInit();
     kb_data = 0;
-    _isLeftShiftPressed = false;
-    _isRightShiftPressed = false;
+    ModifierKeyState = 0;
 }
 
 int32_t Ps2_GetScancode()
@@ -62,13 +61,80 @@ int32_t Ps2_GetScancode()
     }
 
     int32_t code = result & 0xFF;
-    if (code == KEY_LEFTSHIFT)
+    bool isPressed = ((result & 0xFF00) != 0xF000);
+
+    switch (code)
     {
-    	_isLeftShiftPressed = (result & 0xFF00) != 0xF000;
-    }
-    if (code == KEY_RIGHTSHIFT)
-    {
-    	_isRightShiftPressed = (result & 0xFF00) != 0xF000;
+    case KEY_LEFTSHIFT:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::LeftShift;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::LeftShift;
+    	}
+    	break;
+    case KEY_RIGHTSHIFT:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::RightShift;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::RightShift;
+    	}
+    	break;
+    case KEY_L_GUI:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::LeftWindows;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::LeftWindows;
+    	}
+    	break;
+    case KEY_R_GUI:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::RightWindows;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::RightWindows;
+    	}
+    	break;
+    case KEY_LEFTCONTROL:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::LeftControl;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::LeftControl;
+    	}
+    	break;
+    case KEY_RIGHTCONTROL:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::RightControl;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::RightControl;
+    	}
+    	break;
+    case KEY_RIGHTALT:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::RightAlt;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::RightAlt;
+    	}
+    	break;
     }
 
     return result;
@@ -232,7 +298,7 @@ char Ps2_ConvertScancode(int32_t scanCode)
 		break;
 	}
 
-	if (_isLeftShiftPressed || _isRightShiftPressed)
+	if (ModifierKeyState & (ModifierKeys::LeftShift | ModifierKeys::RightShift))
 	{
 		switch (scanCode)
 		{

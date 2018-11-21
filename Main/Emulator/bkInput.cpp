@@ -16,8 +16,8 @@ uint8_t port0177662;
 // bit 6 : 0 key pressed
 uint16_t port0177716 = 0x40;
 
-#define TTY_VECTOR      060     /* standard vector  */
-#define TTY_VECTOR2     0274    /* AR2 (ALT) vector */
+#define TTY_VECTOR      060
+#define TTY_VECTOR2     0274
 
 char keyMap1[] = {
 	// A    B    C    D    E    F    G    H    I    J
@@ -54,62 +54,82 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 		return false;
 	}
 
-	char symbol;
-	switch (scanCode)
+	uint8_t symbol = '\0';
+
+	if (ModifierKeyState & (ModifierKeys::LeftAlt | ModifierKeys::RightAlt))
 	{
-	case KEY_LEFTARROW:
-		symbol = 0x08;
-		break;
-	case KEY_RIGHTARROW:
-		symbol = 0x19;
-		break;
-	case KEY_UPARROW:
-		symbol = 0x1A;
-		break;
-	case KEY_DOWNARROW:
-		symbol = 0x1B;
-		break;
-	case KEY_BACKSPACE:
-		symbol = 0x18;
-		break;
-	case KEY_TAB:
-		symbol = 0x09;
-		break;
-	case KEY_ENTER:
-		symbol = 0x0A;
-		break;
-	case KEY_LEFTCONTROL: // РУС
-	case KEY_L_GUI:
-		symbol = 0x0E;
-		break;
-	case KEY_RIGHTCONTROL: // ЛАТ
-	case KEY_R_GUI:
-		symbol = 0x0F;
-		break;
-	case KEY_ALT: // АР2
-		symbol = 0x0F;
-		break;
-	default:
-		symbol = Ps2_ConvertScancode(scanCode);
-		if (RamBuffer[0x0023] == 0x80)
+		// АР2
+
+		switch (scanCode)
 		{
-			// РУС
-			if (symbol >= 'A' && symbol <= 'Z')
+		case KEY_COMMA:
+			// Inverse on / off
+			symbol = 157;
+			break;
+		case KEY_DIV:
+			// Underscore on / off
+			symbol = 159;
+			break;
+		}
+	}
+	else
+	{
+		switch (scanCode)
+		{
+		case KEY_LEFTARROW:
+			symbol = 0x08;
+			break;
+		case KEY_RIGHTARROW:
+			symbol = 0x19;
+			break;
+		case KEY_UPARROW:
+			symbol = 0x1A;
+			break;
+		case KEY_DOWNARROW:
+			symbol = 0x1B;
+			break;
+		case KEY_BACKSPACE:
+			symbol = 0x18;
+			break;
+		case KEY_TAB:
+			symbol = 0x09;
+			break;
+		case KEY_ENTER:
+			symbol = 0x0A;
+			break;
+		case KEY_LEFTCONTROL: // РУС
+		case KEY_L_GUI:
+			symbol = 0x0E;
+			break;
+		case KEY_RIGHTCONTROL: // ЛАТ
+		case KEY_R_GUI:
+			symbol = 0x0F;
+			break;
+		case KEY_ALT: // АР2
+			symbol = 0x0F;
+			break;
+		default:
+			symbol = Ps2_ConvertScancode(scanCode);
+			if (RamBuffer[0x0023] == 0x80)
 			{
-				symbol = keyMap1[symbol - 'A'];
+				// РУС
+				if (symbol >= 'A' && symbol <= 'Z')
+				{
+					symbol = keyMap1[symbol - 'A'];
+				}
+				else if (symbol >= 'a' && symbol <= 'z')
+				{
+					symbol = keyMap2[symbol - 'a'];
+				}
 			}
-			else if (symbol >= 'a' && symbol <= 'z')
-			{
-				symbol = keyMap2[symbol - 'a'];
-			}
+
+			break;
 		}
 
-		break;
-	}
-
-	if (symbol == '\0')
-	{
-		return false;
+		if (symbol == '\0')
+		{
+			return false;
+		}
 	}
 
 	port0177660 |= 0x80;
