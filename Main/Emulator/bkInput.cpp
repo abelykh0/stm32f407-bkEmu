@@ -21,23 +21,23 @@ uint16_t port0177716 = 0x40;
 
 char keyMap1[] = {
 	// A    B    C    D    E    F    G    H    I    J
-	  'F', 'I', 'S', 'W', 'T', 'A', 'P', 'R', '[', 'O',
+	  'f', 'i', 's', 'w', 'u', 'a', 'p', 'r', ']', 'o',
 
 	// K    L    M    N    O    P    Q    R    S    T
-	  'L', 'D', 'X', 'T', ']', 'Z', 'J', 'K', 'Y', 'E',
+	  'l', 'd', 'x', 't', 'z', 'h', 'j', 'k', 'y', 'e',
 
 	// U    V    W    X    Y    Z
-	  'G', 'M', 'C', '^', 'N', 'Q'
+	  '[', 'm', 'c', '^', 'n', 'q'
 };
 char keyMap2[] = {
 	// a    b    c    d    e    f    g    h    i    j
-	  'f', 'i', 's', 'w', 't', 'a', 'p', 'r', '[', 'o',
+      'F', 'I', 'S', 'W', 'U', 'A', 'P', 'R', ']', 'O',
 
 	// k    l    m    n    o    p    q    r    s    t
-	  'l', 'd', 'x', 't', ']', 'z', 'j', 'k', 'y', 'e',
+	  'L', 'D', 'X', 'T', 'Z', 'H', 'J', 'K', 'Y', 'E',
 
 	// u    v    w    x    y    z
-	  'g', 'm', 'c', '^', 'n', 'q'
+	  '[', 'M', 'C', '^', 'N', 'Q'
 };
 
 int tty_finish(d_word info)
