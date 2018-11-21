@@ -24,6 +24,7 @@ uint8_t  _debugBorderColor;
 
 // Spectrum video RAM + border color
 // 256x256 or 512x256 pixels
+__attribute__((section(".vga_local_ram")))
 BkScreenData _bkScreenData;
 
 // Used in saveState / restoreState

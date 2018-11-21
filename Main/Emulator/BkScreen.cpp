@@ -1,7 +1,7 @@
 #include "bkscreen.h"
 #include <string.h>
 #include "m4vgalib/vga.h"
-#include "m4vgalib/unpack_1bpp.h"
+#include "m4vgalib/rast/unpack_1bpp.h"
 #include "draw2color.h"
 #include "bkemu.h"
 
@@ -29,6 +29,8 @@ BkScreen::BkScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
 {
 	port0177664 = 01330;
 
+	this->_hResolution = 550;
+	this->_horizontalBorder = (this->_hResolution - this->_hResolutionNoBorder) / 2;
 	this->_attributeCount = 0;
 }
 
@@ -36,30 +38,35 @@ void BkScreen::InvertColor()
 {
 }
 
-__attribute__((section(".ramcode")))
+//__attribute__((section(".ramcode")))
 Rasterizer::RasterInfo BkScreen::rasterize(
 		unsigned cycles_per_pixel, unsigned line_number, Pixel *target)
 {
-	uint8_t borderColor = 0x10; //*this->Settings.BorderColor;
+	uint8_t borderColor = *this->Settings.BorderColor;
 	bool isNarrow = (RamBuffer[0x0020] == 0);
 	uint8_t divider = (isNarrow ? 1 : 2);
-
 	uint16_t scaledLine = (line_number - this->_startLine) / 2;
+	uint16_t scaledResolution = this->_hResolution / divider;
+
+	Rasterizer::RasterInfo result;
+	result.offset = 125;
+	result.length = scaledResolution;
+	result.cycles_per_pixel = cycles_per_pixel * divider;
+
 	if (scaledLine == 0)
 	{
 		this->_frames++;
-	}
 
-	if (scaledLine < this->_verticalBorder
-			|| scaledLine >= (unsigned)(this->_vResolution - this->_verticalBorder))
+		memset(&target[0], borderColor, scaledResolution);
+		result.repeat_lines = this->_verticalBorder - 1;
+	}
+	else if (scaledLine >= (unsigned)(this->_vResolution - this->_verticalBorder - 1))
 	{
-		memset(&target[0], borderColor, this->_hResolution / divider);
+		memset(&target[0], borderColor, scaledResolution);
+		result.repeat_lines = (this->_vResolution - this->_verticalBorder * 2) - 1;
 	}
 	else
 	{
-		// Border to the left
-		//memset(&target[0], borderColor, this->_horizontalBorder / divider);
-
 		uint8_t vline = scaledLine - this->_verticalBorder;
 
 		// scroll
@@ -82,16 +89,9 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 			}
 		}
 
-		// Border to the right
-		//memset(&target[(this->_hResolution - this->_horizontalBorder) / divider],
-		//		borderColor, this->_horizontalBorder / divider);
+		result.repeat_lines = 1;
 	}
 
-	Rasterizer::RasterInfo result;
-	result.offset = 0;
-	result.length = this->_hResolution / divider;
-	result.cycles_per_pixel = cycles_per_pixel * divider;
-	result.repeat_lines = 1;
 	return result;
 }
 }
