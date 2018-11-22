@@ -7,7 +7,6 @@
 #include "m4vgalib/timing.h"
 #include "etl/stm32f4xx/gpio.h"
 #include "Keyboard/ps2Keyboard.h"
-//#include "Emulator/z80snapshot.h"
 #include "Emulator/bkEmu.h"
 #include "resources/keyboard.h"
 
@@ -19,7 +18,6 @@ uint8_t _buffer16K_2[0x4000];
 // Debug screen video RAM
 // DEBUG_COLUMNS x DEBUG_ROWS characters
 uint8_t  _debugPixels[52 * 8 * DEBUG_ROWS]; // number of text columns must be divisible by 4
-uint16_t _debugAttributes[52 * DEBUG_ROWS]; // number of text columns must be divisible by 4
 uint8_t  _debugBorderColor;
 
 // Spectrum video RAM + border color
@@ -34,13 +32,13 @@ BkScreenData* _savedScreenData = (BkScreenData*)_buffer16K_2;
 uint16_t _debugBandHeight = DEBUG_ROWS * 8 * 2;
 VideoSettings _videoSettings {
 	&vga::timing_800x600_56hz, // Timing
-	2, 2,  // Scale
-	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, _debugAttributes,
+	1, 2,  // Scale
+	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, nullptr,
 	&_debugBorderColor
 };
 uint16_t _bkBandHeight = _videoSettings.Timing->video_end_line
 		- _videoSettings.Timing->video_start_line - _debugBandHeight;
-Screen DebugScreen(_videoSettings, _bkBandHeight, _debugBandHeight);
+StatusScreen DebugScreen(_videoSettings, _bkBandHeight, _debugBandHeight);
 vga::Band _debugBand {
 	&DebugScreen, _debugBandHeight, nullptr
 };

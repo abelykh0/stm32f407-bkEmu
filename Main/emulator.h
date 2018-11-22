@@ -3,6 +3,7 @@
 
 #include "Display/Screen.h"
 #include "Emulator/BkScreen.h"
+#include "Display/StatusScreen.h"
 #include "fatfs.h"
 
 using namespace Display;
@@ -14,11 +15,10 @@ using namespace bk;
 typedef struct
 {
 	uint8_t  Pixels[0x4000];
-	//uint16_t Attributes[1];
 	uint8_t  BorderColor;
 } BkScreenData;
 
-extern Screen DebugScreen;
+extern StatusScreen DebugScreen;
 extern BkScreen MainScreen;
 extern uint8_t _buffer16K_1[0x4000];
 extern uint8_t _buffer16K_2[0x4000];
