@@ -1,8 +1,8 @@
 #include "bkscreen.h"
 #include <string.h>
 #include "m4vgalib/vga.h"
+#include <Emulator/unpack_2bpp.h>
 #include "m4vgalib/rast/unpack_1bpp.h"
-#include "draw2color.h"
 #include "bkemu.h"
 
 //   0020 Screen mode 0 - 512x256, FF - 256x256

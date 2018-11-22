@@ -21,15 +21,14 @@
 #include "resources/monitor.h"
 #include "Keyboard/ps2Keyboard.h"
 
+unsigned short last_branch;
 uint8_t RamBuffer[RAM_AVAILABLE];
 pdp_regs pdp;
-unsigned short last_branch;
+flag_t bkmodel = 0;
+
 flag_t io_stop_happened;
 BkScreen* _bkScreen;
-flag_t bkmodel = 0;
-double ticks_screen = 0.0;
 const int TICK_RATE = 3000000; /* CPU clock speed */
-double frame_delay = TICK_RATE / 25; /* Delay in ticks between video frames */
 
 void bk_setup(BkScreen* bkScreen)
 {
@@ -159,35 +158,6 @@ int32_t bk_loop()
 //			}
 //			ticks_timer += half_frame_delay;
 //		}
-
-	if (ticks >= ticks_screen)
-	{
-		/* In full speed, update every 40 real ms */
-//		    if (fullspeed) {
-//			Uint32 cur_sdl_ticks = SDL_GetTicks();
-//		 	if (cur_sdl_ticks - last_screen_update >= 40) {
-//			    last_screen_update = cur_sdl_ticks;
-//			    scr_flush();
-//			}
-//		    } else {
-//			scr_flush();
-//		    }
-//		    tty_recv();
-		ticks_screen += frame_delay;
-		/* In simulated speed, if we're more than 10 ms
-		 * ahead, slow down. Avoid rounding the delay up
-		 * by SDL. If the sound is on, sound buffering
-		 * provides synchronization.
-		 */
-//		    if (!fullspeed && !nflag) {
-//		    	double cur_delta =
-//				ticks - SDL_GetTicks() * (TICK_RATE/1000.0);
-//			if (cur_delta - timing_delta > TICK_RATE/100) {
-//				int msec = (cur_delta - timing_delta) / (TICK_RATE/1000);
-//				SDL_Delay(msec / 10 * 10);
-//			}
-//        }
-	}
 
 	int priority = (p->psw >> 5) & 7;
 	if (pending_interrupts && priority != 7)

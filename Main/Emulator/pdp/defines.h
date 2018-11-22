@@ -102,17 +102,8 @@ typedef struct _pdp_regs {
 #define LINE_SIZE       4
 #define TIMER_REG       0177706
 #define TIMER_SIZE      3
-#define DISK_REG	0177130
-#define DISK_SIZE	2
 #define SECRET_REG	0177700
 #define SECRET_SIZE	3
-#define TERAK_BOOT	0173000
-#define TERAK_BSIZE	0200
-#define TERAK_DISK_REG 0177000
-#define TERAK_DISK_SIZE 2
-
-#define PDP_READABLE_MEM_SIZE   (63 * 512)  /* 0 - 175777 */
-#define PDP_FULL_MEM_SIZE       (64 * 512)  /* 0 - 177777 */
 
 int ll_word(pdp_regs* p, c_addr addr, d_word* word);
 int sl_word(pdp_regs* p, c_addr addr, d_word word);
@@ -141,7 +132,7 @@ int ev_fire(int priority);
  * Defines for the event handling system.
  */
 
-#define NUM_PRI         2
+#define NUM_PRI     2
 
 /* Timer interrupt has higher priority */
 #define TIMER_PRI	0
