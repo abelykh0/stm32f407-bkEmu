@@ -18,6 +18,11 @@ StatusScreen::StatusScreen(VideoSettings settings, uint16_t startLine, uint16_t 
 
 void StatusScreen::InvertColor()
 {
+	for (int i = 0; i < 8; i++)
+	{
+		uint8_t* pixels = this->GetPixelPointer(this->_cursor_y + i, this->_cursor_x);
+		*pixels = ~(*pixels);
+	}
 }
 
 //__attribute__((section(".ramcode")))
@@ -33,27 +38,28 @@ Rasterizer::RasterInfo StatusScreen::rasterize(
 	result.length = scaledResolution;
 	result.cycles_per_pixel = cycles_per_pixel;
 
-	if (scaledLine == 0)
+	if (this->_verticalBorder > 0)
 	{
-		this->_frames++;
-
-		uint32_t fill = borderColor << 8 | borderColor;
-		fill |= fill << 16;
-		for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
+		if (scaledLine == 0)
 		{
-			*ptr = fill;
+			uint32_t fill = borderColor << 8 | borderColor;
+			fill |= fill << 16;
+			for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
+			{
+				*ptr = fill;
+			}
+			result.repeat_lines = this->_verticalBorder * 2 - 1;
 		}
-		result.repeat_lines = this->_verticalBorder * 2 - 1;
-	}
-	else if (scaledLine == (unsigned)(this->_vResolution - this->_verticalBorder - 1))
-	{
-		uint32_t fill = borderColor << 8 | borderColor;
-		fill |= fill << 16;
-		for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
+		else if (scaledLine == (unsigned)(this->_vResolution - this->_verticalBorder - 1))
 		{
-			*ptr = fill;
+			uint32_t fill = borderColor << 8 | borderColor;
+			fill |= fill << 16;
+			for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
+			{
+				*ptr = fill;
+			}
+			result.repeat_lines = (this->_vResolution - this->_verticalBorder) * 2 - 1;
 		}
-		result.repeat_lines = (this->_vResolution - this->_verticalBorder) * 2 - 1;
 	}
 	else
 	{

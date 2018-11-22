@@ -1,5 +1,5 @@
-#ifndef __BKSCREEN_H
-#define __BKSCREEN_H
+#ifndef _BKSCREEN_H
+#define _BKSCREEN_H
 
 #include "Display/Screen.h"
 #include "m4vgalib/rasterizer.h"

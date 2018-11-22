@@ -17,7 +17,7 @@ uint8_t _buffer16K_2[0x4000];
 
 // Debug screen video RAM
 // DEBUG_COLUMNS x DEBUG_ROWS characters
-uint8_t  _debugPixels[52 * 8 * DEBUG_ROWS]; // number of text columns must be divisible by 4
+uint8_t  _debugPixels[DEBUG_COLUMNS * 8 * DEBUG_ROWS];
 uint8_t  _debugBorderColor;
 
 // Spectrum video RAM + border color

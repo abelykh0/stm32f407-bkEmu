@@ -1,4 +1,4 @@
-#include "Emulator/bkscreen.h"
+#include "bkscreen.h"
 #include <string.h>
 #include "m4vgalib/vga.h"
 #include "m4vgalib/rast/unpack_1bpp.h"
