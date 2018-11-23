@@ -15,14 +15,14 @@ class Screen: public Rasterizer
 private:
     void PrintChar(char c, uint16_t color);
     void PrintCharAt(uint8_t x, uint8_t y, unsigned char c, uint16_t color);
-    void DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c);
-    void Bitmap(uint16_t x, uint16_t y, const unsigned char *bmp,
-                uint16_t i, uint8_t width, uint8_t lines);
     void CursorNext();
 
 protected:
+    void Bitmap(uint16_t x, uint16_t y, const unsigned char *bmp,
+                uint16_t i, uint8_t width, uint8_t lines);
 	virtual uint8_t* GetPixelPointer(uint16_t line);
 	virtual uint8_t* GetPixelPointer(uint16_t line, uint8_t character);
+    virtual void DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c);
     virtual void InvertColor();
 
     uint16_t _hResolution;

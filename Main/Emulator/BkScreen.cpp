@@ -84,6 +84,11 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
 		uint8_t* dest = &target[this->_horizontalBorder / divider];
+		if (!isNarrow)
+		{
+			// don't know why we need this
+			dest++;
+		}
 
 		if (isNarrow)
 		{

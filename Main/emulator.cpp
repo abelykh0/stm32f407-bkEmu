@@ -90,9 +90,7 @@ void showErrorMessage(const char* errorMessage)
 
 void showTitle(const char* title)
 {
-	DebugScreen.SetAttribute(0x3F00); // white on black
 	DebugScreen.PrintAlignCenter(0, title);
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 }
 
 void showKeyboardSetup()
@@ -100,7 +98,6 @@ void showKeyboardSetup()
 	saveState();
 	_showingKeyboard = true;
 
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 	DebugScreen.PrintAlignCenter(2, "Press any key to return");
 
@@ -141,7 +138,6 @@ void toggleHelp()
 void clearHelp()
 {
 	DebugScreen.HideCursor();
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 
 	_helpShown = false;
@@ -150,16 +146,16 @@ void clearHelp()
 void showHelp()
 {
 	DebugScreen.HideCursor();
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 
 	DebugScreen.PrintAt(0, 0, "F1  - show / hide help");
 	DebugScreen.PrintAt(0, 1, "F2  - save snapshot to SD card");
 	DebugScreen.PrintAt(0, 2, "F3  - load snapshot from SD card");
 	DebugScreen.PrintAt(0, 3, "F5  - reset");
-	DebugScreen.PrintAt(0, 4, "F6  - set date and time");
-	DebugScreen.PrintAt(0, 5, "F10 - show keyboard layout");
-	DebugScreen.PrintAt(0, 6, "F12 - show registers");
+
+	DebugScreen.PrintAt(35, 0, "F6  - set date and time");
+	DebugScreen.PrintAt(35, 1, "F10 - show keyboard layout");
+	DebugScreen.PrintAt(35, 2, "F12 - show registers");
 
 	_helpShown = true;
 }
@@ -180,7 +176,6 @@ void setDateTimeSetup()
 {
 	_settingDateTime = true;
 
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 	showTitle("Set Date and Time. ENTER, ESC, BS");
 
@@ -321,7 +316,6 @@ void restoreState(bool restoreScreen)
 
 void showRegisters()
 {
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 	showTitle("Registers. ESC - clear");
 

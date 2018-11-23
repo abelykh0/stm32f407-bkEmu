@@ -1,5 +1,6 @@
 #include "StatusScreen.h"
 #include <string.h>
+#include <stm32f407xx.h>
 #include "m4vgalib/vga.h"
 #include "m4vgalib/rast/unpack_1bpp.h"
 
@@ -14,6 +15,20 @@ StatusScreen::StatusScreen(VideoSettings settings, uint16_t startLine, uint16_t 
 	this->_hResolution = 560;
 	this->_horizontalBorder = (this->_hResolution - this->_hResolutionNoBorder) / 2;
 	this->_attributeCount = 0;
+}
+
+void StatusScreen::DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c)
+{
+	c -= *(f + 2);
+	uint8_t charDefinition[8];
+	memcpy(charDefinition, f + (c * *(f + 1)) + 3, 8);
+	uint32_t* w = (uint32_t*)charDefinition;
+	*w = __REV(*w);
+	*w = __RBIT(*w);
+	w++;
+	*w = __REV(*w);
+	*w = __RBIT(*w);
+	Screen::Bitmap(x, y, charDefinition, 0, *f, *(f + 1));
 }
 
 void StatusScreen::InvertColor()

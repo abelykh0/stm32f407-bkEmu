@@ -10,7 +10,7 @@
 
 using namespace bk;
 
-#define FILE_COLUMNS 3
+#define FILE_COLUMNS 4
 
 uint8_t _fileColumnWidth = DEBUG_COLUMNS / FILE_COLUMNS;
 int16_t _selectedFile = 0;
@@ -45,14 +45,6 @@ TCHAR* TruncateFileName(TCHAR* fileName)
 	return result;
 }
 
-void noScreenshot()
-{
-	MainScreen.Clear();
-	//MainScreen.SetAttribute(0x0310); // red on blue
-	//MainScreen.PrintAlignCenter(11, "Error reading selected file");
-	//MainScreen.SetAttribute(0x3F10); // white on blue
-}
-
 void SetSelection(uint8_t selectedFile)
 {
 	if (_fileCount == 0)
@@ -65,52 +57,6 @@ void SetSelection(uint8_t selectedFile)
 	uint8_t x, y;
 	GetFileCoord(selectedFile, &x, &y);
 	DebugScreen.PrintAt(x, y, "\x10"); // ►
-
-	FRESULT fr;
-
-	// Show screenshot for the selected file
-	fr = f_mount(&SDFatFS, (TCHAR const*) SDPath, 1);
-	if (fr == FR_OK)
-	{
-		FIL file;
-		bool scrFileFound = false;
-
-		TCHAR* fileName = _fileNames[selectedFile];
-
-		// Try to open file with the same name and .SCR extension
-		TCHAR* scrFileName = (TCHAR*) _buffer16K_1;
-		strncpy(scrFileName, fileName, FF_MAX_LFN + 1);
-		TCHAR* extension = strrchr(scrFileName, '.');
-		if (extension != nullptr)
-		{
-			strncpy(extension, ".scr", 4);
-			fr = f_open(&file, scrFileName, FA_READ | FA_OPEN_EXISTING);
-			if (fr == FR_OK)
-			{
-				//if (!LoadScreenshot(&file, _buffer16K_1))
-				//{
-					noScreenshot();
-				//}
-				f_close(&file);
-				scrFileFound = true;
-			}
-		}
-
-		if (!scrFileFound)
-		{
-			fr = f_open(&file, fileName, FA_READ | FA_OPEN_EXISTING);
-			if (fr == FR_OK)
-			{
-				//if (!LoadScreenFromZ80Snapshot(&file, _buffer16K_1))
-				//{
-					noScreenshot();
-				//}
-				f_close(&file);
-			}
-		}
-
-		f_mount(&SDFatFS, (TCHAR const*) SDPath, 0);
-	}
 }
 
 void loadSnapshot(const TCHAR* fileName)
@@ -173,7 +119,6 @@ static int fileCompare(const void* a, const void* b)
 
 bool saveSnapshotSetup()
 {
-	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
 
 	showTitle("Save snapshot. ENTER, ESC, BS");
@@ -187,8 +132,8 @@ bool saveSnapshotSetup()
 	// Unmount file system
 	f_mount(&SDFatFS, (TCHAR const*) SDPath, 0);
 
-	DebugScreen.PrintAt(0, 2, "Enter file name:");
-	DebugScreen.SetCursorPosition(0, 3);
+	DebugScreen.PrintAt(0, 1, "Enter file name:");
+	DebugScreen.SetCursorPosition(0, 2);
 	DebugScreen.ShowCursor();
 	memset(_snapshotName, 0, FF_MAX_LFN + 1);
 	_savingSnapshot = true;
@@ -225,8 +170,8 @@ bool saveSnapshotLoop()
 	case KEY_ENTER:
 	case KEY_KP_ENTER:
 		DebugScreen.HideCursor();
-		DebugScreen.PrintAt(0, 5, "Saving...                  ");
-		strcat(_snapshotName,".z80");
+		DebugScreen.PrintAt(0, 3, "Saving...                  ");
+		strcat(_snapshotName,".bin");
 		if (saveSnapshot(_snapshotName))
 		{
 			_savingSnapshot = false;
@@ -236,7 +181,7 @@ bool saveSnapshotLoop()
 		else
 		{
 			DebugScreen.SetAttribute(0x0310); // red on blue
-			DebugScreen.PrintAt(0, 5, "Error saving file");
+			DebugScreen.PrintAt(0, 3, "Error saving file");
 			DebugScreen.SetAttribute(0x3F10); // white on blue
 			DebugScreen.SetCursorPosition(x, 3);
 			DebugScreen.ShowCursor();
@@ -290,7 +235,7 @@ bool loadSnapshotSetup()
 	bool result = true;
 
 	fr = f_findfirst(&folder, &fileInfo, (const TCHAR*) "/",
-			(const TCHAR*) "*.z80");
+			(const TCHAR*) "*.bin");
 
 	if (fr == FR_OK)
 	{
@@ -323,6 +268,7 @@ bool loadSnapshotSetup()
 	{
 		DebugScreen.PrintAt(_fileColumnWidth, y, "\xB3"); // │
 		DebugScreen.PrintAt(_fileColumnWidth * 2 + 1, y, "\xB3"); // │
+		DebugScreen.PrintAt(_fileColumnWidth * 3 + 1, y, "\xB3"); // │
 	}
 
 	uint8_t x, y;
