@@ -125,6 +125,16 @@ int32_t Ps2_GetScancode()
             ModifierKeyState &= ~ModifierKeys::RightControl;
     	}
     	break;
+    case KEY_ALT:
+    	if (isPressed)
+    	{
+            ModifierKeyState |= ModifierKeys::LeftAlt;
+    	}
+    	else
+    	{
+            ModifierKeyState &= ~ModifierKeys::LeftAlt;
+    	}
+    	break;
     case KEY_RIGHTALT:
     	if (isPressed)
     	{

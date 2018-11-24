@@ -21,23 +21,23 @@ uint16_t port0177716 = 0x40;
 
 char keyMap1[] = {
 	// A    B    C    D    E    F    G    H    I    J
-	  'f', 'i', 's', 'w', 'u', 'a', 'p', 'r', ']', 'o',
+	  'f', 'i', 's', 'w', 'u', 'a', 'p', 'r', '{', 'o',
 
 	// K    L    M    N    O    P    Q    R    S    T
-	  'l', 'd', 'x', 't', 'z', 'h', 'j', 'k', 'y', 'e',
+	  'l', 'd', 'x', 't', '}', 'z', 'j', 'k', 'y', 'e',
 
 	// U    V    W    X    Y    Z
-	  '[', 'm', 'c', '^', 'n', 'q'
+	  'g', 'm', 'c', '~', 'n', 'q'
 };
 char keyMap2[] = {
 	// a    b    c    d    e    f    g    h    i    j
-      'F', 'I', 'S', 'W', 'U', 'A', 'P', 'R', ']', 'O',
+      'F', 'I', 'S', 'W', 'U', 'A', 'P', 'R', '[', 'O',
 
 	// k    l    m    n    o    p    q    r    s    t
-	  'L', 'D', 'X', 'T', 'Z', 'H', 'J', 'K', 'Y', 'E',
+	  'L', 'D', 'X', 'T', ']', 'Z', 'J', 'K', 'Y', 'E',
 
 	// u    v    w    x    y    z
-	  '[', 'M', 'C', '^', 'N', 'Q'
+	  'G', 'M', 'C', '^', 'N', 'Q'
 };
 
 int tty_finish(d_word info)
@@ -144,7 +144,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	}
 	port0177662 = symbol & 0x7F;
 
-	ev_register(TTY_PRI, tty_finish, 0, port0177662);
+	ev_register(TTY_PRI, tty_finish, 0, symbol);
 
 	return true;
 }
