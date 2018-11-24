@@ -64,11 +64,22 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 		{
 		case KEY_COMMA:
 			// Inverse on / off
-			symbol = 157;
+			symbol = 156;
 			break;
 		case KEY_DIV:
 			// Underscore on / off
 			symbol = 159;
+			break;
+		default:
+			symbol = Ps2_ConvertScancode(scanCode);
+			if (symbol >= 'a' && symbol <= 'z')
+			{
+				symbol = keyMap1[symbol - 'a'] + 95;
+			}
+			else
+			{
+				symbol = '\0';
+			}
 			break;
 		}
 	}
@@ -92,7 +103,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 			symbol = 0x18;
 			break;
 		case KEY_TAB:
-			symbol = 0x09;
+			symbol = 20;
 			break;
 		case KEY_ENTER:
 			symbol = 0x0A;
