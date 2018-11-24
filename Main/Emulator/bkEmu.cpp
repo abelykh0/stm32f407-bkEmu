@@ -16,7 +16,6 @@
 
 #include "bkEmu.h"
 #include "bkInput.h"
-#include "pdp/defines.h"
 #include "resources/basic.h"
 #include "resources/monitor.h"
 #include "Keyboard/ps2Keyboard.h"

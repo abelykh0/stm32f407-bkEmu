@@ -6,7 +6,7 @@
 #include "SDCard.h"
 #include "Emulator.h"
 #include "Keyboard/ps2Keyboard.h"
-//#include "Emulator/z80snapshot.h"
+#include "Emulator/bkSnapshot.h"
 
 using namespace bk;
 
@@ -66,7 +66,7 @@ void loadSnapshot(const TCHAR* fileName)
 	{
 		FIL file;
 		fr = f_open(&file, fileName, FA_READ | FA_OPEN_EXISTING);
-		//LoadZ80Snapshot(&file, _buffer16K_1, _buffer16K_2);
+		LoadSnapshot(&file);
 		f_close(&file);
 
 		f_mount(&SDFatFS, (TCHAR const*) SDPath, 0);
