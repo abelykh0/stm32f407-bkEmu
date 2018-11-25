@@ -113,6 +113,10 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 			// Underscore on / off
 			symbol = 159;
 			break;
+		case KEY_ESC: // СБР
+			// Extended memory on / off
+			symbol = 140;
+			break;
 		default:
 			symbol = Ps2_ConvertScancode(scanCode);
 			symbol = convertSymbol(symbol, false);
@@ -123,6 +127,9 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	{
 		switch (scanCode)
 		{
+		case KEY_ESC: // СБР
+			symbol = 12;
+			break;
 		case KEY_LEFTARROW:
 			symbol = 0x08;
 			break;

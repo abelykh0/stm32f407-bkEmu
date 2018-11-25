@@ -8,6 +8,8 @@
 //   0020 Screen mode 0 - 512x256, FF - 256x256
 //   0021 Screen inversion 0 - off, FF - on
 
+// 0..7 Shift
+// 9 Extended memory 0 - on, 1 - off
 uint16_t port0177664;
 
 namespace bk
@@ -50,8 +52,20 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 
 	Rasterizer::RasterInfo result;
 	result.offset = 125;
-	result.length = scaledResolution;
 	result.cycles_per_pixel = cycles_per_pixel * divider;
+	result.length = scaledResolution;
+
+	uint16_t bottomBorderStart;
+	if ((port0177664 & 0x0200) == 0)
+	{
+		// Extended memory on
+		bottomBorderStart = this->_verticalBorder + 7 * 8;
+	}
+	else
+	{
+		// Standard mode
+		bottomBorderStart = this->_vResolution - this->_verticalBorder;
+	}
 
 	if (scaledLine == 0)
 	{
@@ -65,7 +79,7 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		}
 		result.repeat_lines = this->_verticalBorder * 2 - 1;
 	}
-	else if (scaledLine == (unsigned)(this->_vResolution - this->_verticalBorder - 1))
+	else if (scaledLine == bottomBorderStart)
 	{
 		uint32_t fill = borderColor << 8 | borderColor;
 		fill |= fill << 16;
@@ -73,7 +87,7 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 		{
 			*ptr = fill;
 		}
-		result.repeat_lines = (this->_vResolution - this->_verticalBorder) * 2 - 1;
+		result.repeat_lines = (this->_vResolution - bottomBorderStart) * 2 - 1;
 	}
 	else
 	{
