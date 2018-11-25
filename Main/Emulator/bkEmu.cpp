@@ -269,7 +269,7 @@ extern "C" int ll_word(pdp_regs* p, c_addr addr, d_word* word)
 
 		*word = (byte2 << 8) | byte1;
 
-		return ODD_ADDRESS;
+		return OK;
 	}
 
 	if (addr >= (uint16_t) 0xFF80)

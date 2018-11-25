@@ -47,6 +47,49 @@ int tty_finish(d_word info)
 	return OK;
 }
 
+uint8_t convertSymbol(uint8_t symbol, bool returnItself)
+{
+	if (symbol >= 'A' && symbol <= 'Z')
+	{
+		return keyMap1[symbol - 'A'];
+	}
+
+	if (symbol >= 'a' && symbol <= 'z')
+	{
+		return keyMap2[symbol - 'a'];
+	}
+
+	switch (symbol)
+	{
+	case '"': // Э
+		return '|';
+	case '\'': // э
+		return '\\';
+	case '>': // Ю
+		return '`';
+	case '.': // ю
+		return '@';
+	case '{': // Х
+		return 'h';
+	case '[': // х
+		return 'H';
+	case '}': // Ъ
+		return '_';
+	case ']': // ъ
+		return '_';
+	case ':': // Ж
+		return 'v';
+	case ';': // ж
+		return 'V';
+	case '<': // Б
+		return 'b';
+	case ',': // б
+		return 'B';
+	}
+
+	return returnItself ? symbol : '\0';
+}
+
 bool OnKey(uint32_t scanCode, bool isKeyUp)
 {
 	if (isKeyUp)
@@ -72,14 +115,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 			break;
 		default:
 			symbol = Ps2_ConvertScancode(scanCode);
-			if (symbol >= 'a' && symbol <= 'z')
-			{
-				symbol = keyMap1[symbol - 'a'] + 95;
-			}
-			else
-			{
-				symbol = '\0';
-			}
+			symbol = convertSymbol(symbol, false);
 			break;
 		}
 	}
@@ -124,14 +160,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 			if (RamBuffer[0x0023] == 0x80)
 			{
 				// РУС
-				if (symbol >= 'A' && symbol <= 'Z')
-				{
-					symbol = keyMap1[symbol - 'A'];
-				}
-				else if (symbol >= 'a' && symbol <= 'z')
-				{
-					symbol = keyMap2[symbol - 'a'];
-				}
+				symbol = convertSymbol(symbol, true);
 			}
 
 			break;

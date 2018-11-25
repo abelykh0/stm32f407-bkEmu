@@ -35,7 +35,7 @@ void StatusScreen::InvertColor()
 {
 	for (int i = 0; i < 8; i++)
 	{
-		uint8_t* pixels = this->GetPixelPointer(this->_cursor_y + i, this->_cursor_x);
+		uint8_t* pixels = this->GetPixelPointer(this->_cursor_y * 8 + i, this->_cursor_x);
 		*pixels = ~(*pixels);
 	}
 }
@@ -52,6 +52,11 @@ Rasterizer::RasterInfo StatusScreen::rasterize(
 	result.offset = 125;
 	result.length = scaledResolution;
 	result.cycles_per_pixel = cycles_per_pixel;
+
+	if (scaledLine == 0)
+	{
+		this->_frames++;
+	}
 
 	if (this->_verticalBorder > 0)
 	{
