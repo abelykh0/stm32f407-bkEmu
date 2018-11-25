@@ -74,7 +74,7 @@ uint8_t convertSymbol(uint8_t symbol, bool returnItself)
 	case '[': // х
 		return 'H';
 	case '}': // Ъ
-		return '_';
+		return '\x7F';
 	case ']': // ъ
 		return '_';
 	case ':': // Ж
@@ -85,6 +85,10 @@ uint8_t convertSymbol(uint8_t symbol, bool returnItself)
 		return 'b';
 	case ',': // б
 		return 'B';
+	case '?':
+		return ',';
+	case '/':
+		return '.';
 	}
 
 	return returnItself ? symbol : '\0';
@@ -120,6 +124,10 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 		default:
 			symbol = Ps2_ConvertScancode(scanCode);
 			symbol = convertSymbol(symbol, false);
+			if (symbol != '\0')
+			{
+				symbol += 89;
+			}
 			break;
 		}
 	}
@@ -127,6 +135,9 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 	{
 		switch (scanCode)
 		{
+		case KEY_INSERT: // |=>
+			symbol = 23;
+			break;
 		case KEY_ESC: // СБР
 			symbol = 12;
 			break;
@@ -149,6 +160,7 @@ bool OnKey(uint32_t scanCode, bool isKeyUp)
 			symbol = 20;
 			break;
 		case KEY_ENTER:
+		case KEY_KP_ENTER:
 			symbol = 0x0A;
 			break;
 		case KEY_LEFTCONTROL: // РУС

@@ -43,9 +43,9 @@ public:
     uint16_t _attributeCount;
     volatile uint32_t _frames = 0;
 
-    VideoSettings Settings;
-    Screen(VideoSettings settings);
-	Screen(VideoSettings settings, uint16_t startLine, uint16_t height);
+    VideoSettings* Settings;
+    Screen(VideoSettings* settings);
+	Screen(VideoSettings* settings, uint16_t startLine, uint16_t height);
 
 	void Clear();
 	void SetFont(const uint8_t* font);

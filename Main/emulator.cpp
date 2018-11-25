@@ -15,6 +15,9 @@ using namespace etl::stm32f4xx;
 uint8_t _buffer16K_1[0x4000];
 uint8_t _buffer16K_2[0x4000];
 
+uint8_t _palette1[6] = { Black, Blue, Green, Red, Black, White };
+uint8_t _palette2[6] = { Black, LightGrey, Grey, White, Black, White };
+
 // Debug screen video RAM
 // DEBUG_COLUMNS x DEBUG_ROWS characters
 uint8_t  _debugPixels[DEBUG_COLUMNS * 8 * DEBUG_ROWS];
@@ -33,12 +36,12 @@ uint16_t _debugBandHeight = DEBUG_ROWS * 8 * 2;
 VideoSettings _videoSettings {
 	&vga::timing_800x600_56hz, // Timing
 	1, 2,  // Scale
-	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, nullptr,
+	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, (uint16_t*)_palette1,
 	&_debugBorderColor
 };
 uint16_t _bkBandHeight = _videoSettings.Timing->video_end_line
 		- _videoSettings.Timing->video_start_line - _debugBandHeight;
-StatusScreen DebugScreen(_videoSettings, _bkBandHeight, _debugBandHeight);
+StatusScreen DebugScreen(&_videoSettings, _bkBandHeight, _debugBandHeight);
 vga::Band _debugBand {
 	&DebugScreen, _debugBandHeight, nullptr
 };
@@ -47,9 +50,9 @@ vga::Band _debugBand {
 VideoSettings _bkVideoSettings {
 	&vga::timing_800x600_56hz, // Timing
 	1, 2, // Scale
-	64, 32, _bkScreenData.Pixels, nullptr, &_bkScreenData.BorderColor
+	64, 32, _bkScreenData.Pixels, (uint16_t*)_palette1, &_bkScreenData.BorderColor
 };
-BkScreen MainScreen(_bkVideoSettings, 0, _bkBandHeight);
+BkScreen MainScreen(&_bkVideoSettings, 0, _bkBandHeight);
 vga::Band _band {
 	&MainScreen, _bkBandHeight, &_debugBand
 };
@@ -154,8 +157,9 @@ void showHelp()
 	DebugScreen.PrintAt(0, 3, "F5  - reset");
 
 	DebugScreen.PrintAt(35, 0, "F6  - set date and time");
-	DebugScreen.PrintAt(35, 1, "F10 - show keyboard layout");
-	DebugScreen.PrintAt(35, 2, "F12 - show registers");
+	DebugScreen.PrintAt(35, 1, "F7  - color / black & white");
+	DebugScreen.PrintAt(35, 2, "F10 - show keyboard layout");
+	DebugScreen.PrintAt(35, 3, "F12 - show registers");
 
 	_helpShown = true;
 }
@@ -187,12 +191,12 @@ void setDateTimeSetup()
 	sprintf(formattedDateTime, "%04d-%02d-%02d %02d:%02d:%02d",
 			date.Year + 2000, date.Month, date.Date,
 			time.Hours, time.Minutes, time.Seconds);
-	DebugScreen.PrintAlignCenter(2, formattedDateTime);
+	DebugScreen.PrintAlignCenter(1, formattedDateTime);
 
 	_frames = DebugScreen._frames + 5;
 
-	DebugScreen.PrintAt(0, 4, "Enter new date and time (yyyy-mm-dd hh:mm:ss):");
-	DebugScreen.SetCursorPosition(0, 5);
+	DebugScreen.PrintAt(0, 2, "Enter new date and time (yyyy-mm-dd hh:mm:ss):");
+	DebugScreen.SetCursorPosition(0, 3);
 	DebugScreen.ShowCursor();
 	memset(_newDateTime, 0, 20);
 }
@@ -216,8 +220,9 @@ bool setDateTimeLoop()
 		sprintf(formattedDateTime, "%04d-%02d-%02d %02d:%02d:%02d",
 				date.Year + 2000, date.Month, date.Date,
 				time.Hours, time.Minutes, time.Seconds);
-		DebugScreen.PrintAlignCenter(2, formattedDateTime);
-		DebugScreen.SetCursorPosition(x, 5);
+		DebugScreen.HideCursor();
+		DebugScreen.PrintAlignCenter(1, formattedDateTime);
+		DebugScreen.SetCursorPosition(x, 3);
 		DebugScreen.ShowCursor();
 		_frames = DebugScreen._frames + 5;
 	}
@@ -312,6 +317,18 @@ void restoreState(bool restoreScreen)
 	}
 
 	restoreHelp();
+}
+
+void togglePalette()
+{
+	if (_bkVideoSettings.Attributes == (uint16_t*)_palette1)
+	{
+		_bkVideoSettings.Attributes = (uint16_t*)_palette2;
+	}
+	else
+	{
+		_bkVideoSettings.Attributes = (uint16_t*)_palette1;
+	}
 }
 
 void showRegisters()

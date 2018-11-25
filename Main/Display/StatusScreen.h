@@ -19,7 +19,7 @@ protected:
     virtual void DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c) override;
 
 public:
-    StatusScreen(VideoSettings settings, uint16_t startLine, uint16_t height);
+    StatusScreen(VideoSettings* settings, uint16_t startLine, uint16_t height);
 
 	virtual RasterInfo rasterize(unsigned cycles_per_pixel, unsigned line_number,
 			Pixel *target) override;

@@ -218,7 +218,7 @@ bool loadSnapshotSetup()
 
 	DebugScreen.SetAttribute(0x3F10); // white on blue
 	DebugScreen.Clear();
-	*MainScreen.Settings.BorderColor = 0x10;
+	*MainScreen.Settings->BorderColor = 0x10;
 
 	showTitle("Load snapshot. ENTER, ESC, \x18, \x19, \x1A, \x1B"); // ↑, ↓, →, ←
 

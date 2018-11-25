@@ -9,7 +9,7 @@ namespace Display
 
 uint8_t _palette[2] = { LightBlue, White };
 
-StatusScreen::StatusScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
+StatusScreen::StatusScreen(VideoSettings* settings, uint16_t startLine, uint16_t height)
 	: Screen(settings, startLine, height)
 {
 	this->_hResolution = 560;
@@ -44,7 +44,7 @@ void StatusScreen::InvertColor()
 Rasterizer::RasterInfo StatusScreen::rasterize(
 		unsigned cycles_per_pixel, unsigned line_number, Pixel *target)
 {
-	uint8_t borderColor = *this->Settings.BorderColor;
+	uint8_t borderColor = *this->Settings->BorderColor;
 	uint16_t scaledLine = (line_number - this->_startLine) / 2;
 	uint16_t scaledResolution = this->_hResolution;
 
@@ -86,7 +86,7 @@ Rasterizer::RasterInfo StatusScreen::rasterize(
 		uint8_t vline = scaledLine - this->_verticalBorder;
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
 		uint8_t* dest = &target[this->_horizontalBorder];
-		rast::unpack_1bpp_impl(bitmap, _palette, dest, this->Settings.TextColumns / 4);
+		rast::unpack_1bpp_impl(bitmap, _palette, dest, this->Settings->TextColumns / 4);
 		result.repeat_lines = 1;
 	}
 

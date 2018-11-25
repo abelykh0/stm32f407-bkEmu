@@ -15,18 +15,14 @@ uint16_t port0177664;
 namespace bk
 {
 
-uint8_t _palette1[4] = { Black, Blue, Green, Red };
-//uint8_t _palette1[4] = { Black, LightGrey, Grey, White };
-uint8_t _palette3[2] = { Black, White };
-
-BkScreen::BkScreen(VideoSettings settings) :
+BkScreen::BkScreen(VideoSettings* settings) :
 		BkScreen(settings, 0,
-				settings.Timing->video_end_line
-						- settings.Timing->video_start_line)
+				settings->Timing->video_end_line
+						- settings->Timing->video_start_line)
 {
 }
 
-BkScreen::BkScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
+BkScreen::BkScreen(VideoSettings* settings, uint16_t startLine, uint16_t height)
 	: Screen(settings, startLine, height)
 {
 	port0177664 = 01330;
@@ -44,7 +40,7 @@ void BkScreen::InvertColor()
 Rasterizer::RasterInfo BkScreen::rasterize(
 		unsigned cycles_per_pixel, unsigned line_number, Pixel *target)
 {
-	uint8_t borderColor = *this->Settings.BorderColor;
+	uint8_t borderColor = *this->Settings->BorderColor;
 	bool isNarrow = (RamBuffer[0x0020] == 0);
 	uint8_t divider = (isNarrow ? 1 : 2);
 	uint16_t scaledLine = (line_number - this->_startLine) / 2;
@@ -106,13 +102,13 @@ Rasterizer::RasterInfo BkScreen::rasterize(
 
 		if (isNarrow)
 		{
-			rast::unpack_1bpp_impl(bitmap, _palette3, dest, 16);
+			rast::unpack_1bpp_impl(bitmap, ((const uint8_t*)this->Settings->Attributes) + 4, dest, 16);
 		}
 		else
 		{
 			for (int x = 0; x < 16; x++)
 			{
-				Draw2Color(*bitmap, _palette1, dest);
+				Draw2Color(*bitmap, (uint8_t*)this->Settings->Attributes, dest);
 				dest += 16;
 				bitmap++;
 			}

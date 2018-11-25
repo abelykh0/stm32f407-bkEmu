@@ -87,6 +87,10 @@ extern "C" void loop()
 		setDateTimeSetup();
 		break;
 
+	case KEY_F7:
+		togglePalette();
+		break;
+
 	case KEY_F10:
 		showKeyboardSetup();
 		break;
