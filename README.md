@@ -1,7 +1,5 @@
 # stm32f407-bkEmu
-BK-0010 Emulator on STM32F407
-# stm32f407-z80emu
-Spectrum ZX 48K emulator (using STM32F407 microcontroller)
+BK-0010 Emulator (using STM32F407 microcontroller)
 
 ![Breadboard](https://raw.githubusercontent.com/abelykh0/stm32f407-z80emu/master/doc/stm32f407-z80emu.jpg)
 
