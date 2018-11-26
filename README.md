@@ -53,5 +53,5 @@ This project uses several libraries (in addition to HAL drivers from STMicroelec
 ## Plans for the future / issues
 * Load / save files in .COD format
 * Save snapshot
-* The speed is 12% faster than it is supposed to be
+* Measure emulation speed and see if it needs a slowdown
 * Sound
