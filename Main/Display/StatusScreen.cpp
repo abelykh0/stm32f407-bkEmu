@@ -7,8 +7,6 @@
 namespace Display
 {
 
-uint8_t _palette[2] = { LightBlue, White };
-
 StatusScreen::StatusScreen(VideoSettings* settings, uint16_t startLine, uint16_t height)
 	: Screen(settings, startLine, height)
 {
@@ -22,6 +20,7 @@ void StatusScreen::DrawChar(const uint8_t *f, uint16_t x, uint16_t y, uint8_t c)
 	c -= *(f + 2);
 	uint8_t charDefinition[8];
 	memcpy(charDefinition, f + (c * *(f + 1)) + 3, 8);
+
 	uint32_t* w = (uint32_t*)charDefinition;
 	*w = __REV(*w);
 	*w = __RBIT(*w);
@@ -58,35 +57,32 @@ Rasterizer::RasterInfo StatusScreen::rasterize(
 		this->_frames++;
 	}
 
-	if (this->_verticalBorder > 0)
+	if (this->_verticalBorder > 0 && scaledLine == 0)
 	{
-		if (scaledLine == 0)
+		uint32_t fill = borderColor << 8 | borderColor;
+		fill |= fill << 16;
+		for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
 		{
-			uint32_t fill = borderColor << 8 | borderColor;
-			fill |= fill << 16;
-			for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
-			{
-				*ptr = fill;
-			}
-			result.repeat_lines = this->_verticalBorder * 2 - 1;
+			*ptr = fill;
 		}
-		else if (scaledLine == (unsigned)(this->_vResolution - this->_verticalBorder - 1))
+		result.repeat_lines = this->_verticalBorder * 2 - 1;
+	}
+	else if (this->_verticalBorder > 0 && scaledLine == (unsigned)(this->_vResolution - this->_verticalBorder))
+	{
+		uint32_t fill = borderColor << 8 | borderColor;
+		fill |= fill << 16;
+		for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
 		{
-			uint32_t fill = borderColor << 8 | borderColor;
-			fill |= fill << 16;
-			for (uint32_t* ptr = (uint32_t*)target; ptr <= (uint32_t*)target + scaledResolution / 4; ptr++)
-			{
-				*ptr = fill;
-			}
-			result.repeat_lines = (this->_vResolution - this->_verticalBorder) * 2 - 1;
+			*ptr = fill;
 		}
+		result.repeat_lines = this->_verticalBorder * 2 - 1;
 	}
 	else
 	{
-		uint8_t vline = scaledLine - this->_verticalBorder;
+		uint16_t vline = scaledLine - this->_verticalBorder;
 		uint32_t* bitmap = (uint32_t*)this->GetPixelPointer(vline);
 		uint8_t* dest = &target[this->_horizontalBorder];
-		rast::unpack_1bpp_impl(bitmap, _palette, dest, this->Settings->TextColumns / 4);
+		rast::unpack_1bpp_impl(bitmap, (const uint8_t*)this->Settings->Attributes, dest, this->Settings->TextColumns / 4);
 		result.repeat_lines = 1;
 	}
 

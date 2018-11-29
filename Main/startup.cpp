@@ -56,9 +56,7 @@ extern "C" void loop()
 
 	switch (result)
 	{
-	case KEY_ESC:
-		clearHelp();
-		break;
+
 
 	case KEY_F1:
 		toggleHelp();

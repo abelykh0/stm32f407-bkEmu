@@ -4,9 +4,6 @@
 #include "Screen.h"
 #include "m4vgalib/rasterizer.h"
 
-#define LightBlue 0B00010000
-#define White     0B00111111
-
 using namespace vga;
 
 namespace Display

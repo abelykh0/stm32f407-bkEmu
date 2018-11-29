@@ -17,6 +17,7 @@ uint8_t _buffer16K_2[0x4000];
 
 uint8_t _palette1[6] = { Black, Blue, Green, Red, Black, White };
 uint8_t _palette2[6] = { Black, LightGrey, Grey, White, Black, White };
+uint8_t _paletteStatus[] = { LightBlue, White };
 
 // Debug screen video RAM
 // DEBUG_COLUMNS x DEBUG_ROWS characters
@@ -36,7 +37,7 @@ uint16_t _debugBandHeight = DEBUG_ROWS * 8 * 2;
 VideoSettings _videoSettings {
 	&vga::timing_800x600_56hz, // Timing
 	1, 2,  // Scale
-	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, (uint16_t*)_palette1,
+	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, (uint16_t*)_paletteStatus,
 	&_debugBorderColor
 };
 uint16_t _bkBandHeight = _videoSettings.Timing->video_end_line
