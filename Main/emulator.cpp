@@ -12,57 +12,58 @@
 
 using namespace etl::stm32f4xx;
 
+#define DEBUG_BAND_HEIGHT (DEBUG_ROWS * 8 * 2)
+
 uint8_t _buffer16K_1[0x4000];
 uint8_t _buffer16K_2[0x4000];
 
-uint8_t _palette1[6] = { Black, Blue, Green, Red, Black, White };
-uint8_t _palette2[6] = { Black, LightGrey, Grey, White, Black, White };
-uint8_t _paletteStatus[] = { LightBlue, White };
+static uint8_t _palette1[6] = { Black, Blue, Green, Red, Black, White };
+static uint8_t _palette2[6] = { Black, LightGrey, Grey, White, Black, White };
+static uint8_t _paletteStatus[] = { LightBlue, White };
 
 // Debug screen video RAM
 // DEBUG_COLUMNS x DEBUG_ROWS characters
-uint8_t  _debugPixels[DEBUG_COLUMNS * 8 * DEBUG_ROWS];
-uint8_t  _debugBorderColor;
+static uint8_t  _debugPixels[DEBUG_COLUMNS * 8 * DEBUG_ROWS];
+static uint8_t  _debugBorderColor;
 
 // Spectrum video RAM + border color
 // 256x256 or 512x256 pixels
 __attribute__((section(".vga_local_ram")))
-BkScreenData _bkScreenData;
+static BkScreenData _bkScreenData;
 
 // Used in saveState / restoreState
-BkScreenData* _savedScreenData = (BkScreenData*)_buffer16K_2;
+static BkScreenData* _savedScreenData = (BkScreenData*)_buffer16K_2;
 
 // Debug band
-uint16_t _debugBandHeight = DEBUG_ROWS * 8 * 2;
-VideoSettings _videoSettings {
+static VideoSettings _videoSettings {
 	&vga::timing_800x600_56hz, // Timing
 	1, 2,  // Scale
 	DEBUG_COLUMNS, DEBUG_ROWS, _debugPixels, (uint16_t*)_paletteStatus,
 	&_debugBorderColor
 };
-uint16_t _bkBandHeight = _videoSettings.Timing->video_end_line
-		- _videoSettings.Timing->video_start_line - _debugBandHeight;
-StatusScreen DebugScreen(&_videoSettings, _bkBandHeight, _debugBandHeight);
-vga::Band _debugBand {
-	&DebugScreen, _debugBandHeight, nullptr
+static uint16_t _bkBandHeight = _videoSettings.Timing->video_end_line
+		- _videoSettings.Timing->video_start_line - DEBUG_BAND_HEIGHT;
+StatusScreen DebugScreen(&_videoSettings, _bkBandHeight, DEBUG_BAND_HEIGHT);
+static vga::Band _debugBand {
+	&DebugScreen, DEBUG_BAND_HEIGHT, nullptr
 };
 
 // BK screen band
-VideoSettings _bkVideoSettings {
+static VideoSettings _bkVideoSettings {
 	&vga::timing_800x600_56hz, // Timing
 	1, 2, // Scale
 	64, 32, _bkScreenData.Pixels, (uint16_t*)_palette1, &_bkScreenData.BorderColor
 };
 BkScreen MainScreen(&_bkVideoSettings, 0, _bkBandHeight);
-vga::Band _band {
+static vga::Band _band {
 	&MainScreen, _bkBandHeight, &_debugBand
 };
 
-bool _showingKeyboard;
-bool _settingDateTime;
-uint32_t _frames;
-char* _newDateTime = (char*)_buffer16K_2;
-bool _helpShown;
+static bool _showingKeyboard;
+static bool _settingDateTime;
+static uint32_t _frames;
+static char* _newDateTime = (char*)_buffer16K_2;
+static bool _helpShown;
 
 extern RTC_HandleTypeDef hrtc;
 

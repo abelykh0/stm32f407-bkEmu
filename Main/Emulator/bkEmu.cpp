@@ -20,13 +20,14 @@
 #include "resources/monitor.h"
 #include "Keyboard/ps2Keyboard.h"
 
-unsigned short last_branch;
 uint8_t RamBuffer[RAM_AVAILABLE];
 pdp_regs pdp;
-flag_t bkmodel = 0;
-
-flag_t io_stop_happened;
 BkScreen* _bkScreen;
+
+flag_t bkmodel = 0;
+flag_t io_stop_happened;
+unsigned short last_branch;
+
 const int TICK_RATE = 3000000; /* CPU clock speed */
 
 void bk_setup(BkScreen* bkScreen)

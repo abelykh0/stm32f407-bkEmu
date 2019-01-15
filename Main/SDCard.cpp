@@ -11,21 +11,21 @@
 using namespace bk;
 
 #define FILE_COLUMNS 4
+#define FILE_COLUMN_WIDTH (DEBUG_COLUMNS / FILE_COLUMNS)
 
-uint8_t _fileColumnWidth = DEBUG_COLUMNS / FILE_COLUMNS;
-int16_t _selectedFile = 0;
-int16_t _fileCount;
+static int16_t _selectedFile = 0;
+static int16_t _fileCount;
 
 typedef TCHAR FileName[FF_MAX_LFN + 1];
-FileName* _fileNames = (FileName*) _buffer16K_2;
+static FileName* _fileNames = (FileName*) _buffer16K_2;
 
-bool _loadingSnapshot = false;
-bool _savingSnapshot = false;
-char* _snapshotName = (char*)&_buffer16K_1[2];
+static bool _loadingSnapshot = false;
+static bool _savingSnapshot = false;
+static char* _snapshotName = (char*)&_buffer16K_1[2];
 
 void GetFileCoord(uint8_t fileIndex, uint8_t* x, uint8_t* y)
 {
-	*x = fileIndex / (DEBUG_ROWS - 1) * (_fileColumnWidth + 1);
+	*x = fileIndex / (DEBUG_ROWS - 1) * (FILE_COLUMN_WIDTH + 1);
 	*y = 1 + fileIndex % (DEBUG_ROWS - 1);
 }
 
@@ -195,7 +195,7 @@ bool saveSnapshotLoop()
 
 	default:
 		char character = Ps2_ConvertScancode(scanCode);
-		if (DebugScreen._cursor_x < _fileColumnWidth && character != '\0'
+		if (DebugScreen._cursor_x < FILE_COLUMN_WIDTH && character != '\0'
 			&& character != '\\' && character != '/' && character != ':'
 			&& character != '*' && character != '?' && character != '"'
 			&& character != '<' && character != '>' && character != '|')
@@ -266,9 +266,9 @@ bool loadSnapshotSetup()
 
 	for (int y = 1; y < DEBUG_ROWS; y++)
 	{
-		DebugScreen.PrintAt(_fileColumnWidth, y, "\xB3"); // │
-		DebugScreen.PrintAt(_fileColumnWidth * 2 + 1, y, "\xB3"); // │
-		DebugScreen.PrintAt(_fileColumnWidth * 3 + 1, y, "\xB3"); // │
+		DebugScreen.PrintAt(FILE_COLUMN_WIDTH, y, "\xB3"); // │
+		DebugScreen.PrintAt(FILE_COLUMN_WIDTH * 2 + 1, y, "\xB3"); // │
+		DebugScreen.PrintAt(FILE_COLUMN_WIDTH * 3 + 1, y, "\xB3"); // │
 	}
 
 	uint8_t x, y;
