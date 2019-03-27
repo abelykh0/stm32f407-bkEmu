@@ -350,20 +350,13 @@ void showRegisters()
 
     char* buf = (char*)_buffer16K_1;
 
-//    sprintf(buf, "PC %04x  AF %04x  AF' %04x  I %02x",
-//        _zxCpu.pc, _zxCpu.registers.word[Z80_AF],
-//        _zxCpu.alternates[Z80_AF], _zxCpu.i);
-//    DebugScreen.PrintAlignCenter(2, buf);
-//    sprintf(buf, "SP %04x  BC %04x  BC' %04x  R %02x",
-//        _zxCpu.registers.word[Z80_SP], _zxCpu.registers.word[Z80_BC],
-//        _zxCpu.alternates[Z80_BC], _zxCpu.r);
-//    DebugScreen.PrintAlignCenter(3, buf);
-//    sprintf(buf, "IX %04x  DE %04x  DE' %04x  IM %x",
-//        _zxCpu.registers.word[Z80_IX], _zxCpu.registers.word[Z80_DE],
-//        _zxCpu.alternates[Z80_DE], _zxCpu.im);
-//    DebugScreen.PrintAlignCenter(4, buf);
-//    sprintf(buf, "IY %04x  HL %04x  HL' %04x      ",
-//        _zxCpu.registers.word[Z80_IY], _zxCpu.registers.word[Z80_HL],
-//        _zxCpu.alternates[Z80_HL]);
-    DebugScreen.PrintAlignCenter(5, buf);
+    sprintf(buf, "R0 %04x  R3 %04x  SP %04x",
+    	pdp.regs[0], pdp.regs[3], pdp.regs[6]);
+    DebugScreen.PrintAlignCenter(1, buf);
+    sprintf(buf, "R1 %04x  R4 %04x  PC %04x",
+    	pdp.regs[1], pdp.regs[4], pdp.regs[7]);
+    DebugScreen.PrintAlignCenter(2, buf);
+    sprintf(buf, "R2 %04x  R5 %04x         ",
+    	pdp.regs[2], pdp.regs[5]);
+    DebugScreen.PrintAlignCenter(3, buf);
 }
