@@ -153,6 +153,15 @@ void showHelp()
 	DebugScreen.HideCursor();
 	DebugScreen.Clear();
 
+#ifdef BOARD2
+	DebugScreen.PrintAt(0, 1, "F1  - show / hide help");
+	DebugScreen.PrintAt(0, 2, "F3  - load snapshot from SD card");
+	DebugScreen.PrintAt(0, 3, "F5  - reset");
+
+	DebugScreen.PrintAt(35, 1, "F7  - color / black & white");
+	DebugScreen.PrintAt(35, 2, "F10 - show keyboard layout");
+	DebugScreen.PrintAt(35, 3, "F12 - show registers");
+#else
 	DebugScreen.PrintAt(0, 0, "F1  - show / hide help");
 	DebugScreen.PrintAt(0, 1, "F2  - save snapshot to SD card");
 	DebugScreen.PrintAt(0, 2, "F3  - load snapshot from SD card");
@@ -162,6 +171,7 @@ void showHelp()
 	DebugScreen.PrintAt(35, 1, "F7  - color / black & white");
 	DebugScreen.PrintAt(35, 2, "F10 - show keyboard layout");
 	DebugScreen.PrintAt(35, 3, "F12 - show registers");
+#endif
 
 	_helpShown = true;
 }
