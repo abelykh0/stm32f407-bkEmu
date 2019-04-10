@@ -7,7 +7,7 @@ BK-0010 Emulator (using STM32F407 microcontroller)
 * Emulate BK-0010
 * Load file in .BIN format from SD card
 
-// TODO Video
+![Screenshot](https://raw.githubusercontent.com/abelykh0/stm32f407-z80emu/master/doc/screenshot.jpg)
 
 ## Installation
 If you want to try my project, this is the only part that you need.
